@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
-import { writeScript, factCheck, unsupportedNumbers, validateShape, scriptText } from "./script.js";
+import { writeScript, factCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
@@ -55,7 +55,7 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
     // Voice, with one length-correcting rewrite if the read lands outside 40-60s.
     let voicePath = path.join(projectDir, "voice.mp3");
     let audioDur;
-    for (let pass = 0; pass < 2; pass++) {
+    for (let pass = 0; pass < 3; pass++) {
       const text = scriptText(script);
       const { audio, cost } = await step("tts", () => speak(text, { voice }));
       costs.add("tts", cost);
@@ -64,15 +64,19 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       const total = audioDur + LEAD + TAIL + PAUSE;
       log(`  voice ${audioDur.toFixed(1)}s -> reel ${total.toFixed(1)}s`);
       if (total >= config.minSeconds && total <= config.maxSeconds) break;
-      if (pass === 1) throw new StepError("tts", new Error(`reel length ${total.toFixed(1)}s outside ${config.minSeconds}-${config.maxSeconds}s after rewrite`));
-      const words = text.split(/\s+/).length;
+      if (pass === 2) throw new StepError("tts", new Error(`reel length ${total.toFixed(1)}s outside ${config.minSeconds}-${config.maxSeconds}s after rewrite`));
+      const words = scriptPlain(script).split(/\s+/).length;
       const targetWords = Math.round(words * ((config.minSeconds + config.maxSeconds) / 2 - LEAD - TAIL - PAUSE) / audioDur);
       ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords }), { retries: 0 }));
     }
 
     const stt = await step("timing", () => transcribe(voicePath));
     costs.add("stt", stt.cost);
-    const timeline = buildTimeline(script, stt.words, { audioDuration: audioDur, lead: LEAD, tail: TAIL, pause: PAUSE });
+    // Captions in Roman Hinglish (brand font is Latin-only; Roman is what Indian Shorts use).
+    const roman = await step("captions", () => romanize(stt.words.map((w) => w.text)));
+    costs.add("captions_llm", roman.cost);
+    const capWords = roman.words ? stt.words.map((w, i) => ({ ...w, cap: roman.words[i] })) : stt.words;
+    const timeline = buildTimeline(script, capWords, { audioDuration: audioDur, lead: LEAD, tail: TAIL, pause: PAUSE });
 
     const { credits } = await step("assets", () => resolveVisuals(timeline.shots, projectDir));
 
@@ -94,7 +98,8 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       blog_title: blog.title,
       angle: angleKey,
       title: script.title,
-      script: scriptText(script),
+      script: scriptPlain(script),
+      tts_input: scriptText(script),
       beats: script.beats.map((b) => ({ role: b.role, text: b.text, visual: b.visual })),
       caption: `${script.caption}\n\n${hashtags.join(" ")}`,
       hashtags,

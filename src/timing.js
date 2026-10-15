@@ -1,7 +1,8 @@
 // Turns script beats + word timestamps into a timeline: beat windows, caption chunks, shots.
 
-const normTok = (s) => s.toLowerCase().replace(/[^a-z0-9₹%]/g, "");
-const chars = (s) => s.replace(/[^A-Za-z0-9₹%]/g, "").length;
+const untag = (s) => String(s).replace(/\[[^\]]*\]\s*/g, "");
+const normTok = (s) => untag(s).toLowerCase().replace(/[^\p{L}\p{M}\p{N}₹%]/gu, "");
+const chars = (s) => untag(s).replace(/[^\p{L}\p{M}\p{N}₹%]/gu, "").length;
 
 /**
  * Locate each beat's first spoken word inside the transcript.
@@ -22,7 +23,7 @@ export function beatStartIndices(beats, words) {
     const target = (cum / totalScript) * totalWords;
     let est = wordCum.findIndex((c) => c >= target - 0.5);
     if (est < 0) est = words.length - 1;
-    const first = normTok(beats[i].text.split(/\s+/)[0]);
+    const first = normTok(untag(beats[i].text).split(/\s+/)[0] || "");
     let best = est;
     for (let d = 0; d <= 3 && first; d++) {
       if (normTok(words[est + d]?.text || "") === first) { best = est + d; break; }
@@ -45,7 +46,7 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
   const splitAt = splitWord > 0 ? (words[splitWord - 1].end + words[splitWord].start) / 2 : null;
   const shift = (t) => lead + t + (splitAt != null && t >= splitAt ? pause : 0);
 
-  const W = words.map((w) => ({ text: w.text, start: shift(w.start), end: shift(w.end) }));
+  const W = words.map((w) => ({ text: w.text, cap: w.cap ?? w.text, start: shift(w.start), end: shift(w.end) }));
   const total = shift(audioDuration) + tail;
 
   // Beat windows: each beat owns the screen from its first word until the next beat starts.
@@ -76,10 +77,10 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
   const flush = () => { if (cur.length) chunks.push(cur); cur = []; };
   W.forEach((w, i) => {
     const t = normTok(w.text);
-    cur.push({ ...w, hot: /\d|₹/.test(w.text) || kw.has(t) });
+    cur.push({ text: w.cap, start: w.start, end: w.end, hot: /\d|₹/.test(w.text) || kw.has(t) || kw.has(normTok(w.cap)) });
     const next = W[i + 1];
     const len = cur.map((x) => x.text).join(" ").length;
-    if (/[.,!?;:]$/.test(w.text) || !next || next.start - w.end > 0.28 || cur.length >= 3 || len > 14) flush();
+    if (/[.,!?;:।]$/.test(w.text) || !next || next.start - w.end > 0.28 || cur.length >= 3 || len > 14) flush();
   });
   const captions = chunks.map((c, i) => ({
     words: c,

@@ -31,8 +31,9 @@ export const config = {
 
   scriptModel: env("SCRIPT_MODEL", "anthropic/claude-sonnet-5.5"),
   checkModel: env("CHECK_MODEL", "anthropic/claude-haiku-5.5"),
-  ttsModel: env("TTS_MODEL", "elevenlabs/eleven-multilingual-v2"),
-  ttsVoice: env("TTS_VOICE", "RpiHVNPKGBg7UmgmrKrN"),
+  language: env("LANGUAGE", "hinglish"), // hinglish | english
+  ttsModel: env("TTS_MODEL", "elevenlabs/eleven-v3"),
+  ttsVoice: env("TTS_VOICE", "4yF24b9emqK8f4DBqL2Q"),
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
 
   minSeconds: Number(env("MIN_SECONDS", 40)),

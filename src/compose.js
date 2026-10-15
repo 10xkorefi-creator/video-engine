@@ -125,7 +125,7 @@ const CSS = `
       :root { --acc: #314dd0; --acc2: #5b74ff; --hot: #ffd84d; --ink: #05070f; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body { width: ${W}px; height: ${H}px; overflow: hidden; background: #000; }
-      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: "Disp", sans-serif; }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: "Disp", "Noto Sans Devanagari", sans-serif; }
       #stage { position: absolute; inset: 0; }
       .clip { position: absolute; inset: 0; }
       .shot { overflow: hidden; background: #000; }
