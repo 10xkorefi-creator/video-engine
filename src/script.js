@@ -2,8 +2,10 @@ import { config } from "./config.js";
 import { chatJSON } from "./openrouter.js";
 
 export const ANGLES = {
-  A: "THE COSTLY MISTAKE. Open on the most painful rupee figure, penalty, deadline or surprising fact in the post. Tell it as a story of what goes wrong for a typical founder, why nobody notices, and what the fix is.",
-  B: "THE CONTRARIAN TAKE. Open by challenging a common belief or habit founders have about this topic, where the post itself shows the belief is wrong or costly. Investigate why, reveal the twist, and land on what smart founders do instead. The twist and moral must AGREE with the post's own advice and recommendations; never argue against what the post recommends. If the post has no such belief to challenge, use the hidden-cost angle: what founders lose by ignoring this topic.",
+  A: "THE FOUNDER MISTAKE STORY. Follow one relatable founder through a small, everyday decision that quietly costs them money, time or sleep, the moment they find out, and the simple habit that would have saved them.",
+  B: "MYTH VS REALITY. Open with something most founders confidently believe about this topic, show the real-life consequence of believing it, then the reality and what smart founders do instead. The reality must agree with the blog's advice.",
+  C: "THE WHY BEHIND THE RULE. Founders find this rule annoying. Explain, through a relatable situation, why it exists and how understanding it saves money or headaches.",
+  D: "WHAT SMART FOUNDERS DO DIFFERENTLY. Contrast two founders in the same situation: one firefights at the last minute, one has a simple system. Show the difference in money, stress and time. Keep it tight: max 3 beats per founder.",
 };
 
 const LANG = {
@@ -29,39 +31,47 @@ const LANG = {
 
 const lang = () => LANG[config.language] || LANG.hinglish;
 
-const system = () => `You write viral 45-55 second faceless explainer Shorts for AI Accountant (aiaccountant.com), inspired by Thinketh-style storytelling: hooky, story-driven, fast.
-CREATIVE FREEDOM: the BLOG POST is only a topic direction, not a script. Do NOT summarise it. Pick the single most gripping story or insight from the blog AND the RESEARCH NOTES (a real case, a shocking penalty, a rule most founders get wrong) and build an original narrative around it.
-Audience: founders of Indian SMBs (Rs 1 crore to Rs 100 crore turnover). NOT accountants: no jargon without a 3-word explanation.
+const system = () => `You write viral 45-55 second faceless Shorts for AI Accountant (aiaccountant.com): relatable, story-first, Thinketh-style hooks and pacing.
+Audience: founders and business owners of Indian SMBs (Rs 1-100 crore turnover). They are busy, smart, and NOT accountants. They care about cash, time, stress, growth and not getting a notice. Write for a 25-year-old founder with zero accounting knowledge.
+
+STORY FIRST, RULES SECOND
+- The BLOG POST and RESEARCH NOTES are a topic direction, not a script. Never summarise them.
+- Build the reel around ONE relatable human situation (a founder, a shop owner, a D2C brand, a manufacturer) and its consequence in money, time or stress. Rules, figures and facts appear ONLY when the story needs them to land, as the punchline or the stakes, never as a list.
+- Jargon budget: at most 2 technical terms in the whole reel, each instantly explained in everyday words ("ITC, यानी जो GST आप पहले ही दे चुके हो"). No section numbers, form numbers or acronyms unless one IS the hook. Prefer "notice", "penalty", "late fee", "cash stuck" over legal terms.
+- Max 3 real figures (rates, penalties, deadlines) in the whole reel.
+- Be DECISIVE. Bold, confident claims make founders trust the voice: "ज़्यादातर founders ये गलती करते हैं", "ये एक habit आपके लाखों बचा सकती है", "सरकार आपका इंतज़ार नहीं करेगी". Fine as long as it is an honest, fair reading of the sources (no white lies). Specific rates, penalties, deadlines, rules and real cases must still be exactly right.
+- Talk to the viewer ("आप"), use concrete everyday images (chai, Diwali stock, the CA's WhatsApp, the bank SMS), and one light witty line.
 
 ${lang().voice}
 
-STRUCTURE (beats in this order): hook -> background -> investigation -> twist -> moral -> cta.
-- hook: ONE beat, max 7 words, first sentence max 4 words so it lands in under 2 seconds. A shocking rupee figure, a surprising fact, or a contrarian claim. No greetings, no "did you know".
-- background: set up the situation in plain words.
-- investigation: 2-4 beats digging into why it happens, with the concrete facts/figures from the post.
+STRUCTURE (beats in this order): hook -> setup -> story -> twist -> takeaway -> cta.
+- hook: ONE beat, max 7 words, first sentence max 4 words, lands in under 2 seconds. A relatable shock, a myth, or a question every founder has asked. No greetings, no "did you know".
+- setup: the founder and situation in 1-2 beats.
+- story: 3-5 beats of what happens, with the stakes. Facts only where they raise the stakes.
 - twist: the reveal that reframes everything.
-- moral: one short quotable line.
+- takeaway: one simple, doable habit or quotable line (not tax advice beyond the blog).
 - cta: exactly one beat (text given above).
 
-HARD RULES
-- Use ONLY facts, numbers, deadlines, sections and percentages that appear in the BLOG POST or the RESEARCH NOTES. Never invent figures, case studies, company names, cities or statistics. When the research notes are newer than the blog, prefer the research notes.
-- Write every number in digits exactly as the post does (e.g. "Rs 50 lakh" -> "₹50 lakh", "18%" -> "18%"). Never convert or round numbers. Do not spell numbers as words.
-- Everything is read aloud by a voice engine: no parentheses, slashes or abbreviations it could misread. Write "Section 50(3)" as "Section 50, sub-section 3", "u/s" as "under section".
-- Total spoken words across all beats: ${lang().words[0]}-${lang().words[1]}. 12-16 beats. Each beat ${lang().beatWords} words, one idea. Short sentences.
-- The twist and the moral must agree with the post's recommendations.
-- Do not mention competitors. Do not give tax advice beyond what the post says.
+FACTS (strict)
+- Every real-world claim (rate, penalty, deadline, rule, statistic, real case) must come from the BLOG POST or the RESEARCH NOTES. Never invent real cases, company names, statistics or rules. Prefer research notes when newer.
+- Illustrative examples ARE allowed with round, made-up amounts, but ONLY when clearly framed as hypothetical ("मान लो", "सोचो", "for example") and only for the example's own amounts (turnover, invoice value), never for rates/penalties/rules. Mark such beats with "kind":"example"; all other beats "kind":"fact".
+- When you simplify, keep the meaning EXACT: interest stays interest (not penalty), "per year" or "per month" stays, a deadline stays the same kind of deadline. Big-picture stakes ("लाखों", "हज़ारों का नुकसान") are fine when the sources make them plausible for a typical SMB; never put an exact made-up amount on them.
+- Real figures: digits exactly as in the source ("Rs 50 lakh" -> "₹50 lakh"). Never spell numbers as words.
+- Read aloud by a voice engine: no parentheses, slashes or abbreviations.
+- Total spoken words: ${lang().words[0]}-${lang().words[1]}. 12-16 beats, each ${lang().beatWords} words, one idea, short sentences.
+- The takeaway must agree with the blog's recommendations. No competitors.
 
 VISUAL per beat (one of):
-- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, generic (e.g. 'calculator desk', 'warehouse boxes', 'busy indian market', 'laptop spreadsheet', 'stressed businessman'), no brand names"}
-- {"type":"stat","value":"the exact figure as it appears in this beat's text, e.g. '₹50 lakh' or '18%' or '20th'","label":"2-5 word label"}
-- {"type":"text","value":"2-5 word punchline shown huge on screen"}
-Use stat for every beat whose key point is a number. Use 4-6 cards (stat/text) total, the rest footage. Never two cards in a row. The cta beat uses {"type":"text","value":"aiaccountant.com"}.
+- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday (e.g. 'indian shop owner', 'worried businessman phone', 'chai office', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
+- {"type":"stat","value":"the exact figure as it appears in this beat's text","label":"2-5 word plain-English label"}
+- {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
+Use 3-5 cards (stat/text) total, the rest footage. Never two cards in a row. The cta beat uses {"type":"text","value":"aiaccountant.com"}.
 
 Also return "keywords" per beat: 0-3 words copied exactly from that beat's text to highlight in captions (numbers, the key noun).
 
 Return ONLY JSON:
-{"title":"YouTube Shorts title, max 60 chars, curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
- "beats":[{"role":"hook|background|investigation|twist|moral|cta","text":"spoken words","visual":{...},"keywords":["..."]}],
+{"title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
+ "beats":[{"role":"hook|setup|story|twist|takeaway|cta","kind":"fact|example","text":"spoken words","visual":{...},"keywords":["..."]}],
  "caption":"Instagram/LinkedIn description, 2-3 short lines, ends with 'Read the full guide: <BLOG_URL>'",
  "hashtags":["#GST","..."] (6-10, mix broad and niche, Indian business context)}`;
 
@@ -75,6 +85,7 @@ export function unsupportedNumbers(script, blogText) {
   const blog = norm(blogText);
   const nums = new Set();
   for (const b of script.beats) {
+    if (b.kind === "example") continue; // clearly-framed hypothetical amounts
     for (const src of [stripTags(b.text), b.visual?.value || ""]) {
       for (const m of norm(src).matchAll(/\d+(?:\.\d+)?/g)) nums.add(m[0]);
     }
@@ -89,7 +100,8 @@ export function validateShape(s) {
   const [lo, hi] = lang().words;
   if (beats.length < 10 || beats.length > 18) errs.push(`beat count ${beats.length} (want 12-16)`);
   const words = beats.reduce((n, b) => n + countWords(b.text), 0);
-  if (words < lo - 15 || words > hi + 15) errs.push(`total words ${words} (want ${lo}-${hi})`);
+  if (words > hi + 20) errs.push(`Too long: ${words} spoken words. Cut about ${words - hi} words: drop or merge beats, shorten sentences. Hard limit ${hi} words.`);
+  if (words < lo - 20) errs.push(`Too short: ${words} spoken words. Add about ${lo - words} words of story. Target ${lo}-${hi}.`);
   if (beats[0]?.role !== "hook") errs.push("first beat must be hook");
   if (beats[0] && countWords(beats[0].text) > 8) errs.push("hook longer than 7 words");
   for (const b of beats) if (!b.visual?.type) errs.push(`beat without visual: ${b.text}`);
@@ -122,9 +134,9 @@ export async function factCheck(blog, script, notes = []) {
     model: config.checkModel,
     temperature: 0,
     system: `You are a strict fact-checker. Compare a short video script (may be in Hinglish) with its English sources: a blog post plus researched notes.
-Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post or the research notes, or contradicts them. Rhetorical framing, light humour, opinions, hooks phrased as questions, and simplifications that keep the meaning are fine. The CTA line is fine.
+Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post or the research notes, or contradicts them. Rhetorical framing, light humour, opinions, hooks phrased as questions, simplifications that keep the meaning, and bold-but-fair generalisations or approximate stakes ("most founders miss this", "can cost lakhs") that a reasonable reader of the sources would accept are fine. Flag only specific claims (rate, penalty, deadline, rule, real case, exact amount) that are wrong or unsupported for the situation described, and real meaning changes. The CTA line is fine. Lines marked (EXAMPLE) are hypothetical illustrations: their own made-up amounts are fine IF the line is clearly framed as hypothetical (मान लो / सोचो / for example), but any rate, penalty, deadline or rule they state must still be supported.
 Return ONLY JSON: {"ok": true|false, "issues": ["<quoted claim> - why unsupported"]}`,
-    user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nRESEARCH NOTES:\n${notes.map((n) => `- ${n.fact}`).join("\n") || "- (none)"}\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}. ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
+    user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nRESEARCH NOTES:\n${notes.map((n) => `- ${n.fact}`).join("\n") || "- (none)"}\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}.${b.kind === "example" ? " (EXAMPLE)" : ""} ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
   });
   return { ok: !!json.ok && !(json.issues || []).length, issues: json.issues || [], cost };
 }
@@ -150,4 +162,19 @@ Return ONLY JSON: {"words": ["..."]}`,
   const out = json.words;
   if (!Array.isArray(out) || out.length !== words.length) return { words: null, cost };
   return { words: out.map(String), cost };
+}
+
+/** "Would a founder with zero accounting knowledge get every line?" Returns {ok, issues}. */
+export async function plainCheck(script) {
+  const { json, cost } = await chatJSON({
+    model: config.checkModel,
+    temperature: 0,
+    system: `You review a Hinglish Shorts script for founders of Indian small businesses who have ZERO accounting knowledge.
+Everyday business words founders already use are FINE and must not be flagged: GST, TDS, invoice, bill, turnover, deadline, return, late fee, interest, penalty, notice, CA, Tally, software, vendor, supplier, payment, deposit, e-invoice.
+Flag ONLY real problems: specialist jargon left unexplained (e.g. ITC, RCM, GSTR-2B, reverse charge, section or form numbers, legal terms); more than 2 specialist terms in total; the script reads like a list of rules instead of a story about a person; a line that is genuinely confusing.
+Report at most the 3 most important problems. ok=true when there are 0 or 1 minor problems.
+Return ONLY JSON: {"ok": true|false, "issues": ["<quoted line> - what is confusing and a plainer way to say it"]}`,
+    user: script.beats.map((b, i) => `${i + 1}. ${stripTags(b.text)}`).join("\n"),
+  });
+  return { ok: !!json.ok && !(json.issues || []).length, issues: json.issues || [], cost };
 }

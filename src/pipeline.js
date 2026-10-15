@@ -3,7 +3,7 @@ import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
 import { research as doResearch, sourcesText } from "./research.js";
-import { writeScript, factCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
+import { writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
@@ -17,7 +17,7 @@ const TAIL = 0.9;
 const PAUSE = 0.35;
 
 /** Script + deterministic number guard + LLM fact check, with feedback-driven rewrites. */
-async function scriptWithChecks(blog, angle, costs, opts = {}) {
+export async function scriptWithChecks(blog, angle, costs, opts = {}) {
   let feedback = opts.feedback || "";
   let lastIssues = [];
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -27,11 +27,15 @@ async function scriptWithChecks(blog, angle, costs, opts = {}) {
     const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []));
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
     if (errs.length) { feedback = errs.join("\n"); lastIssues = errs; continue; }
-    const fc = await factCheck(blog, script, opts.research?.notes || []);
-    costs.add("fact_check_llm", fc.cost);
-    if (fc.ok) return { script, words };
+    const [fc, pc] = await Promise.all([factCheck(blog, script, opts.research?.notes || []), plainCheck(script)]);
+    costs.add("fact_check_llm", fc.cost + pc.cost);
+    if (fc.ok && (pc.ok || attempt === 2)) return { script, words, plainIssues: pc.issues };
+    if (!fc.ok) {
     feedback = `Unsupported claims found by the fact checker:\n- ${fc.issues.join("\n- ")}`;
     lastIssues = fc.issues;
+    } else {
+      feedback = `Too technical for a founder with zero accounting knowledge. Rewrite these lines in plain everyday words (keep the story):\n- ${pc.issues.join("\n- ")}`;
+    }
   }
   throw new StepError("fact_check", new Error(`script failed checks after 3 drafts: ${lastIssues.join(" | ").slice(0, 600)}`));
 }
@@ -39,7 +43,7 @@ async function scriptWithChecks(blog, angle, costs, opts = {}) {
 export async function makeReel({ blogUrl, angle = "A", upload = true, voice, outDir }) {
   const t0 = Date.now();
   const costs = new Costs();
-  const angleKey = /^[AB]$/i.test(angle) ? angle.toUpperCase() : `custom-${slugify(angle).slice(0, 24)}`;
+  const angleKey = /^[ABCD]$/i.test(angle) ? angle.toUpperCase() : `custom-${slugify(angle).slice(0, 24)}`;
   const date = new Date().toISOString().slice(0, 10);
   const jobId = `${date}-${slugify(blogUrl)}-${angleKey}`;
   const dir = outDir || path.join(config.workDir, jobId);
