@@ -71,7 +71,7 @@ FACTS (strict)
 - Proof points (75%, 95% bills accuracy, 50+ banks, survey stats, 21-branch hotel) only exactly as written in CONTEXT section 4, and only when they serve the story.
 
 VISUAL per beat (one of):
-- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday (e.g. 'indian shop owner', 'worried businessman phone', 'chai office', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
+- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday, never ambiguous words (say 'invoice paper' not 'bill', 'office desk' not 'desk') (e.g. 'indian shop owner', 'worried businessman phone', 'chai office', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
 - {"type":"stat","value":"the exact figure as it appears in this beat's text","label":"2-5 word plain-English label"}
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
 Use 3-5 cards (stat/text) total, the rest footage. Never two cards in a row. The cta beat uses {"type":"text","value":"aiaccountant.com"}.

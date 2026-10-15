@@ -33,8 +33,13 @@ function pickRendition(hit, minSeconds) {
 }
 
 async function searchVideos(query) {
-  const url = `${API}/videos/?${keyParam()}q=${encodeURIComponent(query)}&video_type=film&safesearch=true&per_page=30&order=popular`;
-  return (await (await http(url)).json()).hits || [];
+  // Business category first (avoids e.g. "bill" -> pelican), then any category.
+  for (const cat of ["&category=business", ""]) {
+    const url = `${API}/videos/?${keyParam()}q=${encodeURIComponent(query)}&video_type=film&safesearch=true&per_page=30&order=popular${cat}`;
+    const hits = (await (await http(url)).json()).hits || [];
+    if (hits.length >= 3) return hits;
+  }
+  return [];
 }
 
 async function searchPhotos(query) {

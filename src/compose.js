@@ -95,7 +95,7 @@ function timelineJs(tl) {
           tl.from(el + " .card > *:not(.glow)", { y: 80, opacity: 0, duration: 0.45, stagger: 0.08, ease: "back.out(1.6)" }, s.start + 0.05);
           const v = document.querySelector(el + " .stat-val");
           if (v) {
-            const m = (v.dataset.count || "").match(/^(\\D*?)([\\d,]+(?:\\.\\d+)?)(.*)$/);
+            const m = (v.dataset.count || "").match(/^(\\D*?)([\\d,]+(?:\\.\\d+)?)(\\D*)$/); // single numbers only, not ranges
             if (m) {
               const target = parseFloat(m[2].replace(/,/g, ""));
               const dec = (m[2].split(".")[1] || "").length;
