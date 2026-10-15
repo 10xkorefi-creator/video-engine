@@ -1,5 +1,10 @@
 import { config } from "./config.js";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { ROOT } from "./config.js";
 import { chatJSON } from "./openrouter.js";
+
+const PRODUCT = readFileSync(path.join(ROOT, "config", "product.md"), "utf8");
 
 export const ANGLES = {
   A: "THE FOUNDER MISTAKE STORY. Follow one relatable founder through a small, everyday decision that quietly costs them money, time or sleep, the moment they find out, and the simple habit that would have saved them.",
@@ -59,7 +64,8 @@ FACTS (strict)
 - Real figures: digits exactly as in the source ("Rs 50 lakh" -> "₹50 lakh"). Never spell numbers as words.
 - Read aloud by a voice engine: no parentheses, slashes or abbreviations.
 - Total spoken words: ${lang().words[0]}-${lang().words[1]}. 12-16 beats, each ${lang().beatWords} words, one idea, short sentences.
-- The takeaway must agree with the blog's recommendations. No competitors.
+- The takeaway must agree with the blog's recommendations.
+- BRAND: mention AI Accountant ONLY if the story's core problem is one the PRODUCT FACTS directly solve (manual data entry, bank entries, reconciliation, GST/ITC matching, choosing or switching accounting software, messy Tally books, no visibility on cash). Then weave it in ONCE inside the story as the smart founder's move, with one concrete thing it does (e.g. "Tally रखो, बस AI Accountant जोड़ दो, bank entries एक click में sync"). If the core problem is a deadline, a rule, a registration, or anything the product facts don't directly fix, do NOT mention AI Accountant at all; the CTA already does. Never a generic tag-on line at the end. Not salesy, no pricing. Tally, Zoho Books and other tools may be named factually; never mock them or make claims about them the sources do not support.
 
 VISUAL per beat (one of):
 - {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday (e.g. 'indian shop owner', 'worried businessman phone', 'chai office', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
@@ -115,6 +121,8 @@ export async function writeScript(blog, angle, { feedback = "", targetWords, res
   const notes = research?.notes || [];
   const user = `ANGLE: ${angleText}
 SEARCH KEYWORD: ${research?.keyword || blog.title}
+PRODUCT FACTS (only source for claims about AI Accountant):
+${PRODUCT}
 RESEARCH NOTES (verified, newer than the blog; you may use these facts):
 ${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
 ${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n` : ""}
@@ -133,10 +141,10 @@ export async function factCheck(blog, script, notes = []) {
   const { json, cost } = await chatJSON({
     model: config.checkModel,
     temperature: 0,
-    system: `You are a strict fact-checker. Compare a short video script (may be in Hinglish) with its English sources: a blog post plus researched notes.
+    system: `You are a strict fact-checker. Compare a short video script (may be in Hinglish) with its English sources: a blog post, researched notes, and AI Accountant product facts (the only valid source for claims about AI Accountant).
 Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post or the research notes, or contradicts them. Rhetorical framing, light humour, opinions, hooks phrased as questions, simplifications that keep the meaning, and bold-but-fair generalisations or approximate stakes ("most founders miss this", "can cost lakhs") that a reasonable reader of the sources would accept are fine. Flag only specific claims (rate, penalty, deadline, rule, real case, exact amount) that are wrong or unsupported for the situation described, and real meaning changes. The CTA line is fine. Lines marked (EXAMPLE) are hypothetical illustrations: their own made-up amounts are fine IF the line is clearly framed as hypothetical (मान लो / सोचो / for example), but any rate, penalty, deadline or rule they state must still be supported.
 Return ONLY JSON: {"ok": true|false, "issues": ["<quoted claim> - why unsupported"]}`,
-    user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nRESEARCH NOTES:\n${notes.map((n) => `- ${n.fact}`).join("\n") || "- (none)"}\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}.${b.kind === "example" ? " (EXAMPLE)" : ""} ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
+    user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nPRODUCT FACTS:\n${PRODUCT}\n\nRESEARCH NOTES:\n${notes.map((n) => `- ${n.fact}`).join("\n") || "- (none)"}\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}.${b.kind === "example" ? " (EXAMPLE)" : ""} ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
   });
   return { ok: !!json.ok && !(json.issues || []).length, issues: json.issues || [], cost };
 }
