@@ -111,7 +111,7 @@ export function validateShape(s) {
   const long = s.length === "long";
   if (beats.length < 10 || beats.length > (long ? 42 : 18)) errs.push(`beat count ${beats.length} (want ${long ? "up to 40" : "12-16"})`);
   const words = beats.reduce((n, b) => n + countWords(b.text), 0);
-  const max = long ? 420 : hi + 35;
+  const max = long ? 420 : hi + 50; // real length is enforced on measured voice duration
   if (words > max) errs.push(`Too long: ${words} spoken words. Cut about ${words - (long ? 400 : hi)} words: drop or merge beats, shorten sentences.${long ? "" : ` Or, only if the story truly needs it, mark "length":"long".`}`);
   if (words < lo - 20) errs.push(`Too short: ${words} spoken words. Add about ${lo - words} words of story. Target ${lo}-${hi}.`);
   if (beats[0]?.role !== "hook") errs.push("first beat must be hook");

@@ -3,7 +3,7 @@ import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
 import { research as doResearch, sourcesText } from "./research.js";
-import { PRODUCT, writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
+import { PRODUCT, stripTags, writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
@@ -135,7 +135,7 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       length: script.length === "long" ? "long" : "short",
       length_reason: script.length_reason || null,
       hook_end_s: Number(timeline.hookEnd.toFixed(2)),
-      hook_first_sentence_s: Number((LEAD + (stt.words.find((w) => /[.!?]$/.test(w.text)) || stt.words[0]).end).toFixed(2)),
+      hook_first_sentence_s: Number((LEAD + stt.words[Math.min(stt.words.length, stripTags(script.beats[0].text).split(/[.?!।]/)[0].trim().split(/\s+/).length) - 1].end).toFixed(2)),
       render_seconds: Math.round(renderSeconds),
       total_seconds: Math.round((Date.now() - t0) / 1000),
       cost_usd: costs.toJSON(),
