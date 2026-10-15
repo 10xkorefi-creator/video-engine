@@ -30,6 +30,7 @@ const LANG = {
 const lang = () => LANG[config.language] || LANG.hinglish;
 
 const system = () => `You write viral 45-55 second faceless explainer Shorts for AI Accountant (aiaccountant.com), inspired by Thinketh-style storytelling: hooky, story-driven, fast.
+CREATIVE FREEDOM: the BLOG POST is only a topic direction, not a script. Do NOT summarise it. Pick the single most gripping story or insight from the blog AND the RESEARCH NOTES (a real case, a shocking penalty, a rule most founders get wrong) and build an original narrative around it.
 Audience: founders of Indian SMBs (Rs 1 crore to Rs 100 crore turnover). NOT accountants: no jargon without a 3-word explanation.
 
 ${lang().voice}
@@ -43,11 +44,11 @@ STRUCTURE (beats in this order): hook -> background -> investigation -> twist ->
 - cta: exactly one beat (text given above).
 
 HARD RULES
-- Use ONLY facts, numbers, deadlines, sections and percentages that appear in the BLOG POST. Never invent figures, case studies, company names, cities or statistics. If the post has no rupee figure, hook with a surprising fact or contrarian claim from it instead.
+- Use ONLY facts, numbers, deadlines, sections and percentages that appear in the BLOG POST or the RESEARCH NOTES. Never invent figures, case studies, company names, cities or statistics. When the research notes are newer than the blog, prefer the research notes.
 - Write every number in digits exactly as the post does (e.g. "Rs 50 lakh" -> "₹50 lakh", "18%" -> "18%"). Never convert or round numbers. Do not spell numbers as words.
 - Everything is read aloud by a voice engine: no parentheses, slashes or abbreviations it could misread. Write "Section 50(3)" as "Section 50, sub-section 3", "u/s" as "under section".
 - Total spoken words across all beats: ${lang().words[0]}-${lang().words[1]}. 12-16 beats. Each beat ${lang().beatWords} words, one idea. Short sentences.
-- The twist and the moral must agree with the post's conclusions and recommendations.
+- The twist and the moral must agree with the post's recommendations.
 - Do not mention competitors. Do not give tax advice beyond what the post says.
 
 VISUAL per beat (one of):
@@ -59,7 +60,7 @@ Use stat for every beat whose key point is a number. Use 4-6 cards (stat/text) t
 Also return "keywords" per beat: 0-3 words copied exactly from that beat's text to highlight in captions (numbers, the key noun).
 
 Return ONLY JSON:
-{"title":"YouTube Shorts title, max 60 chars, curiosity-driven, no clickbait lies",
+{"title":"YouTube Shorts title, max 60 chars, curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
  "beats":[{"role":"hook|background|investigation|twist|moral|cta","text":"spoken words","visual":{...},"keywords":["..."]}],
  "caption":"Instagram/LinkedIn description, 2-3 short lines, ends with 'Read the full guide: <BLOG_URL>'",
  "hashtags":["#GST","..."] (6-10, mix broad and niche, Indian business context)}`;
@@ -97,9 +98,13 @@ export function validateShape(s) {
   return { errs, words };
 }
 
-export async function writeScript(blog, angle, { feedback = "", targetWords } = {}) {
+export async function writeScript(blog, angle, { feedback = "", targetWords, research } = {}) {
   const angleText = ANGLES[angle] || angle;
+  const notes = research?.notes || [];
   const user = `ANGLE: ${angleText}
+SEARCH KEYWORD: ${research?.keyword || blog.title}
+RESEARCH NOTES (verified, newer than the blog; you may use these facts):
+${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
 ${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n` : ""}
 BLOG_URL: ${blog.url}
 BLOG TITLE: ${blog.title}
@@ -112,14 +117,14 @@ ${blog.text}
 }
 
 /** Cheap second model checks every claim against the post. */
-export async function factCheck(blog, script) {
+export async function factCheck(blog, script, notes = []) {
   const { json, cost } = await chatJSON({
     model: config.checkModel,
     temperature: 0,
-    system: `You are a strict fact-checker. Compare a short video script (may be in Hinglish) with its English source blog post.
-Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post, or contradicts it. Rhetorical framing, light humour, opinions, hooks phrased as questions, and simplifications that keep the meaning are fine. The CTA line is fine.
+    system: `You are a strict fact-checker. Compare a short video script (may be in Hinglish) with its English sources: a blog post plus researched notes.
+Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post or the research notes, or contradicts them. Rhetorical framing, light humour, opinions, hooks phrased as questions, and simplifications that keep the meaning are fine. The CTA line is fine.
 Return ONLY JSON: {"ok": true|false, "issues": ["<quoted claim> - why unsupported"]}`,
-    user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}. ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
+    user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nRESEARCH NOTES:\n${notes.map((n) => `- ${n.fact}`).join("\n") || "- (none)"}\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}. ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
   });
   return { ok: !!json.ok && !(json.issues || []).length, issues: json.issues || [], cost };
 }

@@ -1,7 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
+import { research as doResearch, sourcesText } from "./research.js";
 import { writeScript, factCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
@@ -20,13 +21,13 @@ async function scriptWithChecks(blog, angle, costs, opts = {}) {
   let feedback = opts.feedback || "";
   let lastIssues = [];
   for (let attempt = 0; attempt < 3; attempt++) {
-    const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords });
+    const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords, research: opts.research });
     costs.add("script_llm", cost);
     const { errs, words } = validateShape(script);
-    const bad = unsupportedNumbers(script, blog.text);
+    const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []));
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
     if (errs.length) { feedback = errs.join("\n"); lastIssues = errs; continue; }
-    const fc = await factCheck(blog, script);
+    const fc = await factCheck(blog, script, opts.research?.notes || []);
     costs.add("fact_check_llm", fc.cost);
     if (fc.ok) return { script, words };
     feedback = `Unsupported claims found by the fact checker:\n- ${fc.issues.join("\n- ")}`;
@@ -50,7 +51,22 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
   try {
     const blog = await step("fetch_blog", () => fetchBlog(blogUrl));
 
-    let { script } = await step("script", () => scriptWithChecks(blog, angle, costs), { retries: 0 });
+    // Research is best-effort: if web search fails we still write from the blog alone.
+    let research = { keyword: blog.title, notes: [], conflicts: [] };
+    try {
+      const cacheFile = path.join(config.cacheDir, "research", `${date}-${slugify(blogUrl)}.json`);
+      research = await readFile(cacheFile, "utf8").then(JSON.parse).catch(() => null);
+      if (!research) {
+        research = await step("research", () => doResearch(blog));
+        costs.add("research_llm", research.cost);
+        await mkdir(path.dirname(cacheFile), { recursive: true });
+        await writeFile(cacheFile, JSON.stringify(research, null, 1));
+      }
+    } catch (e) {
+      log(`  research skipped: ${e.message}`);
+    }
+
+    let { script } = await step("script", () => scriptWithChecks(blog, angle, costs, { research }), { retries: 0 });
 
     // Voice, with one length-correcting rewrite if the read lands outside 40-60s.
     let voicePath = path.join(projectDir, "voice.mp3");
@@ -67,7 +83,7 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       if (pass === 2) throw new StepError("tts", new Error(`reel length ${total.toFixed(1)}s outside ${config.minSeconds}-${config.maxSeconds}s after rewrite`));
       const words = scriptPlain(script).split(/\s+/).length;
       const targetWords = Math.round(words * ((config.minSeconds + config.maxSeconds) / 2 - LEAD - TAIL - PAUSE) / audioDur);
-      ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords }), { retries: 0 }));
+      ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords, research }), { retries: 0 }));
     }
 
     const stt = await step("timing", () => transcribe(voicePath));
@@ -112,6 +128,9 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       total_seconds: Math.round((Date.now() - t0) / 1000),
       cost_usd: costs.toJSON(),
       media_credits: credits,
+      keyword: research.keyword,
+      research_sources: [...new Set(research.notes.map((n) => n.source_url))],
+      blog_conflicts: research.conflicts,
     };
     await writeFile(path.join(dir, "report.json"), JSON.stringify(result, null, 2));
     if (upload) {
