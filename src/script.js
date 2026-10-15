@@ -122,7 +122,7 @@ export function validateShape(s) {
   return { errs, words };
 }
 
-export async function writeScript(blog, angle, { feedback = "", targetWords, research } = {}) {
+export async function writeScript(blog, angle, { feedback = "", targetWords, research, previous } = {}) {
   const angleText = ANGLES[angle] || angle;
   const notes = research?.notes || [];
   const user = `ANGLE: ${angleText}
@@ -132,7 +132,7 @@ AiA CONTEXT (product, proof points, competitors; only source for claims about AI
 ${PRODUCT}
 RESEARCH NOTES (verified, newer than the blog; you may use these facts):
 ${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
-${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n` : ""}
+${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? (previous ? `YOUR PREVIOUS DRAFT (below) WAS REJECTED. Make the SMALLEST possible edit: rewrite or remove only the flagged lines, keep every other beat, the title and the story exactly as they are. Never replace a flagged claim with a new unsupported claim.\nProblems:\n${feedback}\nPREVIOUS DRAFT JSON:\n${JSON.stringify(previous)}\n` : `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n`) : ""}
 BLOG_URL: ${blog.url}
 BLOG TITLE: ${blog.title}
 BLOG POST:

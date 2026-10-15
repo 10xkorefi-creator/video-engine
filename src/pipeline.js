@@ -20,8 +20,10 @@ const PAUSE = 0.35;
 export async function scriptWithChecks(blog, angle, costs, opts = {}) {
   let feedback = opts.feedback || "";
   let lastIssues = [];
+  let previous = null;
   for (let attempt = 0; attempt < 3; attempt++) {
-    const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords, research: opts.research });
+    const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords, research: opts.research, previous });
+    previous = script;
     costs.add("script_llm", cost);
     const { errs, words } = validateShape(script);
     const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []) + "\n" + PRODUCT);
