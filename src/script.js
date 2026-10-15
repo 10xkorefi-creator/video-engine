@@ -132,7 +132,7 @@ AiA CONTEXT (product, proof points, competitors; only source for claims about AI
 ${PRODUCT}
 RESEARCH NOTES (verified, newer than the blog; you may use these facts):
 ${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
-${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? (previous ? `YOUR PREVIOUS DRAFT (below) WAS REJECTED. Make the SMALLEST possible edit: rewrite or remove only the flagged lines, keep every other beat, the title and the story exactly as they are. Never replace a flagged claim with a new unsupported claim.\nProblems:\n${feedback}\nPREVIOUS DRAFT JSON:\n${JSON.stringify(previous)}\n` : `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n`) : ""}
+${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? (previous ? `YOUR PREVIOUS DRAFT (below) WAS REJECTED. Make the SMALLEST possible edit: rewrite or remove only the flagged lines and keep the rest of the story (if the problem is length, cut or merge beats until it fits; that is the only case where you may change other beats). Never replace a flagged claim with a new unsupported claim.\nProblems:\n${feedback}\nPREVIOUS DRAFT JSON:\n${JSON.stringify(previous)}\n` : `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n`) : ""}
 BLOG_URL: ${blog.url}
 BLOG TITLE: ${blog.title}
 BLOG POST:
