@@ -18,7 +18,7 @@ export async function render(projectDir, outFile) {
 }
 
 /** Sanity-check the output: size, duration window, audio present. */
-export async function verify(file) {
+export async function verify(file, maxSeconds = config.maxSeconds) {
   const out = await run("ffprobe", ["-v", "error", "-show_entries", "stream=codec_type,width,height:format=duration", "-of", "json", file]);
   const j = JSON.parse(out);
   const v = j.streams.find((s) => s.codec_type === "video");
@@ -27,7 +27,7 @@ export async function verify(file) {
   const problems = [];
   if (!v || v.width !== 1080 || v.height !== 1920) problems.push(`bad video stream ${v?.width}x${v?.height}`);
   if (!a) problems.push("no audio stream");
-  if (duration < config.minSeconds - 0.5 || duration > config.maxSeconds + 0.5) problems.push(`duration ${duration.toFixed(1)}s`);
+  if (duration < config.minSeconds - 0.5 || duration > maxSeconds + 0.5) problems.push(`duration ${duration.toFixed(1)}s`);
   if (problems.length) throw new Error(`output check failed: ${problems.join(", ")}`);
   return { duration };
 }

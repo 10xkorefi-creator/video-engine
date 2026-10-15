@@ -39,7 +39,8 @@ export const config = {
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
 
   minSeconds: Number(env("MIN_SECONDS", 40)),
-  maxSeconds: Number(env("MAX_SECONDS", 60)),
+  maxSeconds: Number(env("MAX_SECONDS", 60)), // default short reel
+  maxLongSeconds: Number(env("MAX_LONG_SECONDS", 180)), // only when the story needs it
   renderWorkers: Number(env("RENDER_WORKERS", Math.max(1, os.cpus().length - 1))),
   renderQuality: env("RENDER_QUALITY", "standard"),
   workDir: env("WORK_DIR", path.join(ROOT, "out")),

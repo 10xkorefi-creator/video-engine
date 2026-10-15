@@ -13,7 +13,7 @@ const r = await research(blog);
 costs.add("research", r.cost);
 const { script, plainIssues } = await scriptWithChecks(blog, angle, costs, { research: r });
 console.log(JSON.stringify({
-  blog: url, angle, title: script.title, keyword: r.keyword,
+  blog: url, angle, length: script.length || "short", length_reason: script.length_reason, title: script.title, keyword: r.keyword,
   beats: script.beats.map((b) => ({ role: b.role, kind: b.kind, text: stripTags(b.text), tts: b.text, onScreen: b.visual?.value || b.visual?.query })),
   script: scriptPlain(script), caption: script.caption, hashtags: script.hashtags,
   sources: [...new Set(r.notes.map((n) => n.source_url))], blog_conflicts: r.conflicts,

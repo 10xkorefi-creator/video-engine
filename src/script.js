@@ -4,7 +4,7 @@ import path from "node:path";
 import { ROOT } from "./config.js";
 import { chatJSON } from "./openrouter.js";
 
-const PRODUCT = readFileSync(path.join(ROOT, "config", "product.md"), "utf8");
+export const PRODUCT = readFileSync(path.join(ROOT, "config", "product.md"), "utf8");
 
 export const ANGLES = {
   A: "THE FOUNDER MISTAKE STORY. Follow one relatable founder through a small, everyday decision that quietly costs them money, time or sleep, the moment they find out, and the simple habit that would have saved them.",
@@ -41,6 +41,7 @@ Audience: founders and business owners of Indian SMBs (Rs 1-100 crore turnover).
 
 STORY FIRST, RULES SECOND
 - The BLOG POST and RESEARCH NOTES are a topic direction, not a script. Never summarise them.
+- STAY ON TOPIC: the story must be about the blog's main subject (BLOG TITLE / SEARCH KEYWORD). Research notes only add colour and stakes; never switch to a different subject.
 - Build the reel around ONE relatable human situation (a founder, a shop owner, a D2C brand, a manufacturer) and its consequence in money, time or stress. Rules, figures and facts appear ONLY when the story needs them to land, as the punchline or the stakes, never as a list.
 - Jargon budget: at most 2 technical terms in the whole reel, each instantly explained in everyday words ("ITC, यानी जो GST आप पहले ही दे चुके हो"). No section numbers, form numbers or acronyms unless one IS the hook. Prefer "notice", "penalty", "late fee", "cash stuck" over legal terms.
 - Max 3 real figures (rates, penalties, deadlines) in the whole reel.
@@ -63,9 +64,11 @@ FACTS (strict)
 - When you simplify, keep the meaning EXACT: interest stays interest (not penalty), "per year" or "per month" stays, a deadline stays the same kind of deadline. Big-picture stakes ("लाखों", "हज़ारों का नुकसान") are fine when the sources make them plausible for a typical SMB; never put an exact made-up amount on them.
 - Real figures: digits exactly as in the source ("Rs 50 lakh" -> "₹50 lakh"). Never spell numbers as words.
 - Read aloud by a voice engine: no parentheses, slashes or abbreviations.
-- Total spoken words: ${lang().words[0]}-${lang().words[1]}. 12-16 beats, each ${lang().beatWords} words, one idea, short sentences.
+- LENGTH: default is a 45-60 second reel: ${lang().words[0]}-${lang().words[1]} spoken words, 12-16 beats. Prefer this. ONLY if the story or the explanation genuinely cannot land in 60 seconds, you may go long (up to 3 minutes, max 400 words, up to 40 beats); then set "length":"long" and give a one-line "length_reason". Never pad. Each beat ${lang().beatWords} words, one idea, short sentences.
 - The takeaway must agree with the blog's recommendations.
-- BRAND: mention AI Accountant ONLY if the story's core problem is one the PRODUCT FACTS directly solve (manual data entry, bank entries, reconciliation, GST/ITC matching, choosing or switching accounting software, messy Tally books, no visibility on cash). Then weave it in ONCE inside the story as the smart founder's move, with one concrete thing it does (e.g. "Tally रखो, बस AI Accountant जोड़ दो, bank entries एक click में sync"). If the core problem is a deadline, a rule, a registration, or anything the product facts don't directly fix, do NOT mention AI Accountant at all; the CTA already does. Never a generic tag-on line at the end. Not salesy, no pricing. Tally, Zoho Books and other tools may be named factually; never mock them or make claims about them the sources do not support.
+- BRAND (see AiA CONTEXT): the reel's job is fun, engaging storytelling about a mundane accounting topic, not selling. Whenever the story shows a problem AiA directly solves (CONTEXT sections 2-3: typing bills by hand, messy/handwritten bills, bank statement entry, GSTR-2B matching, accountant churn/backlog, no real-time numbers, duplicate bills, choosing or switching software), you SHOULD weave AI Accountant in ONCE, inside the story, as the smart founder's move, with one concrete thing it does, describing it as working on top of Tally, never as accounting software. If the problem is a deadline, a rule or a registration, do NOT mention AiA (the CTA already does). No generic tag-on lines, no "best"/"number one", no pricing, no unlaunched features.
+- Competitors and alternatives (Tally's Docs by Ira, Suvit, Zoho Books, Excel imports, generic OCR) may be named only when the story is about choosing a tool, using ONLY the facts in CONTEXT section 6, fairly and without mockery, with the contrast naturally favouring AiA. Never make specific claims about VouchrIt.
+- Proof points (75%, 95% bills accuracy, 50+ banks, survey stats, 21-branch hotel) only exactly as written in CONTEXT section 4, and only when they serve the story.
 
 VISUAL per beat (one of):
 - {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday (e.g. 'indian shop owner', 'worried businessman phone', 'chai office', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
@@ -76,7 +79,8 @@ Use 3-5 cards (stat/text) total, the rest footage. Never two cards in a row. The
 Also return "keywords" per beat: 0-3 words copied exactly from that beat's text to highlight in captions (numbers, the key noun).
 
 Return ONLY JSON:
-{"title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
+{"length":"short|long","length_reason":"only if long",
+ "title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
  "beats":[{"role":"hook|setup|story|twist|takeaway|cta","kind":"fact|example","text":"spoken words","visual":{...},"keywords":["..."]}],
  "caption":"Instagram/LinkedIn description, 2-3 short lines, ends with 'Read the full guide: <BLOG_URL>'",
  "hashtags":["#GST","..."] (6-10, mix broad and niche, Indian business context)}`;
@@ -104,9 +108,11 @@ export function validateShape(s) {
   if (!s.title || !Array.isArray(s.beats)) errs.push("missing title/beats");
   const beats = s.beats || [];
   const [lo, hi] = lang().words;
-  if (beats.length < 10 || beats.length > 18) errs.push(`beat count ${beats.length} (want 12-16)`);
+  const long = s.length === "long";
+  if (beats.length < 10 || beats.length > (long ? 42 : 18)) errs.push(`beat count ${beats.length} (want ${long ? "up to 40" : "12-16"})`);
   const words = beats.reduce((n, b) => n + countWords(b.text), 0);
-  if (words > hi + 20) errs.push(`Too long: ${words} spoken words. Cut about ${words - hi} words: drop or merge beats, shorten sentences. Hard limit ${hi} words.`);
+  const max = long ? 420 : hi + 35;
+  if (words > max) errs.push(`Too long: ${words} spoken words. Cut about ${words - (long ? 400 : hi)} words: drop or merge beats, shorten sentences.${long ? "" : ` Or, only if the story truly needs it, mark "length":"long".`}`);
   if (words < lo - 20) errs.push(`Too short: ${words} spoken words. Add about ${lo - words} words of story. Target ${lo}-${hi}.`);
   if (beats[0]?.role !== "hook") errs.push("first beat must be hook");
   if (beats[0] && countWords(beats[0].text) > 8) errs.push("hook longer than 7 words");
@@ -120,8 +126,9 @@ export async function writeScript(blog, angle, { feedback = "", targetWords, res
   const angleText = ANGLES[angle] || angle;
   const notes = research?.notes || [];
   const user = `ANGLE: ${angleText}
+BLOG MAIN TOPIC: ${blog.title}
 SEARCH KEYWORD: ${research?.keyword || blog.title}
-PRODUCT FACTS (only source for claims about AI Accountant):
+AiA CONTEXT (product, proof points, competitors; only source for claims about AI Accountant and competitors):
 ${PRODUCT}
 RESEARCH NOTES (verified, newer than the blog; you may use these facts):
 ${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
@@ -142,7 +149,7 @@ export async function factCheck(blog, script, notes = []) {
     model: config.checkModel,
     temperature: 0,
     system: `You are a strict fact-checker. Compare a short video script (may be in Hinglish) with its English sources: a blog post, researched notes, and AI Accountant product facts (the only valid source for claims about AI Accountant).
-Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post or the research notes, or contradicts them. Rhetorical framing, light humour, opinions, hooks phrased as questions, simplifications that keep the meaning, and bold-but-fair generalisations or approximate stakes ("most founders miss this", "can cost lakhs") that a reasonable reader of the sources would accept are fine. Flag only specific claims (rate, penalty, deadline, rule, real case, exact amount) that are wrong or unsupported for the situation described, and real meaning changes. The CTA line is fine. Lines marked (EXAMPLE) are hypothetical illustrations: their own made-up amounts are fine IF the line is clearly framed as hypothetical (मान लो / सोचो / for example), but any rate, penalty, deadline or rule they state must still be supported.
+Flag a claim ONLY if it states a fact, number, deadline, rule, percentage or example that is NOT supported by the blog post or the research notes, or contradicts them. Rhetorical framing, light humour, opinions, hooks phrased as questions, simplifications that keep the meaning, and bold-but-fair generalisations or approximate stakes ("most founders miss this", "can cost lakhs") that a reasonable reader of the sources would accept are fine. Flag only specific claims (rate, penalty, deadline, rule, real case, exact amount) that are wrong or unsupported for the situation described, and real meaning changes. Do NOT flag harmless storytelling details (scene-setting, feelings, approximate timing like "month end", what a founder thinks or does) unless they state a wrong rule. The CTA line is fine. Lines marked (EXAMPLE) are hypothetical illustrations: their own made-up amounts are fine IF the line is clearly framed as hypothetical (मान लो / सोचो / for example), but any rate, penalty, deadline or rule they state must still be supported.
 Return ONLY JSON: {"ok": true|false, "issues": ["<quoted claim> - why unsupported"]}`,
     user: `BLOG POST:\n"""\n${blog.text}\n"""\n\nPRODUCT FACTS:\n${PRODUCT}\n\nRESEARCH NOTES:\n${notes.map((n) => `- ${n.fact}`).join("\n") || "- (none)"}\n\nSCRIPT:\n${script.beats.map((b, i) => `${i + 1}.${b.kind === "example" ? " (EXAMPLE)" : ""} ${stripTags(b.text)}${b.visual?.value ? ` [on-screen: ${b.visual.value}${b.visual.label ? " " + b.visual.label : ""}]` : ""}`).join("\n")}`,
   });

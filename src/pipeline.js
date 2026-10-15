@@ -3,7 +3,7 @@ import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
 import { research as doResearch, sourcesText } from "./research.js";
-import { writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
+import { PRODUCT, writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
@@ -24,7 +24,7 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
     const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords, research: opts.research });
     costs.add("script_llm", cost);
     const { errs, words } = validateShape(script);
-    const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []));
+    const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []) + "\n" + PRODUCT);
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
     if (errs.length) { feedback = errs.join("\n"); lastIssues = errs; continue; }
     const [fc, pc] = await Promise.all([factCheck(blog, script, opts.research?.notes || []), plainCheck(script)]);
@@ -85,10 +85,12 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       audioDur = await probeDuration(voicePath);
       const total = audioDur + LEAD + TAIL + PAUSE;
       log(`  voice ${audioDur.toFixed(1)}s -> reel ${total.toFixed(1)}s`);
-      if (total >= config.minSeconds && total <= config.maxSeconds) break;
-      if (pass === 2) throw new StepError("tts", new Error(`reel length ${total.toFixed(1)}s outside ${config.minSeconds}-${config.maxSeconds}s after rewrite`));
+      const maxS = script.length === "long" ? config.maxLongSeconds : config.maxSeconds;
+      if (total >= config.minSeconds && total <= maxS) break;
+      if (pass === 2) throw new StepError("tts", new Error(`reel length ${total.toFixed(1)}s outside ${config.minSeconds}-${maxS}s after rewrite`));
       const words = scriptPlain(script).split(/\s+/).length;
-      const targetWords = Math.round(words * ((config.minSeconds + config.maxSeconds) / 2 - LEAD - TAIL - PAUSE) / audioDur);
+      const targetSec = total > maxS ? maxS - 6 : (config.minSeconds + config.maxSeconds) / 2;
+      const targetWords = Math.round(words * (targetSec - LEAD - TAIL - PAUSE) / audioDur);
       ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords, research }), { retries: 0 }));
     }
 
@@ -107,7 +109,7 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
 
     const mp4 = path.join(dir, `${jobId}.mp4`);
     const renderSeconds = await step("render", () => render(projectDir, mp4));
-    const { duration } = await step("verify", () => verify(mp4), { retries: 0 });
+    const { duration } = await step("verify", () => verify(mp4, script.length === "long" ? config.maxLongSeconds : config.maxSeconds), { retries: 0 });
 
     let videoUrl = null;
     if (upload) videoUrl = await step("upload", () => uploadVideo(mp4, `${date}/${slugify(blogUrl)}-${angleKey}.mp4`));
@@ -128,6 +130,8 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       video_url: videoUrl,
       local_file: mp4,
       duration_s: Number(duration.toFixed(2)),
+      length: script.length === "long" ? "long" : "short",
+      length_reason: script.length_reason || null,
       hook_end_s: Number(timeline.hookEnd.toFixed(2)),
       hook_first_sentence_s: Number((LEAD + (stt.words.find((w) => /[.!?]$/.test(w.text)) || stt.words[0]).end).toFixed(2)),
       render_seconds: Math.round(renderSeconds),
