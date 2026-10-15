@@ -82,6 +82,11 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
     const len = cur.map((x) => x.text).join(" ").length;
     if (/[.,!?;:।]$/.test(w.text) || !next || next.start - w.end > 0.28 || cur.length >= 3 || len > 14) flush();
   });
+  // No captions over the CTA end card (it already shows the URL).
+  const ctaStart = beatWin.find((b) => b.role === "cta")?.start ?? Infinity;
+  const kept = chunks.filter((c) => c[0].start < ctaStart - 0.05);
+  chunks.length = 0;
+  chunks.push(...kept);
   const captions = chunks.map((c, i) => ({
     words: c,
     start: c[0].start,

@@ -1,0 +1,25 @@
+# Run next to n8n. The service must share a Docker network with the n8n container so the
+# workflow can call http://reel-engine:8080. Set N8N_NETWORK to n8n's network name
+# (find it with: docker inspect <n8n-container> -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}').
+services:
+  reel-engine:
+    build: .
+    image: reel-engine:latest
+    container_name: reel-engine
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - reel-data:/data
+    # Rendering is CPU-heavy; keep headroom for n8n.
+    cpus: ${REEL_CPUS:-3}
+    mem_limit: 4g
+    shm_size: 1gb
+    networks: [n8n]
+
+volumes:
+  reel-data:
+
+networks:
+  n8n:
+    external: true
+    name: ${N8N_NETWORK:-n8n_default}

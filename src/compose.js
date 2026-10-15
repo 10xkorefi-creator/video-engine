@@ -9,6 +9,14 @@ const f = (n) => Number(n).toFixed(3);
 
 const TRANSITIONS = ["whip", "punch", "whipUp", "punch", "flash"];
 
+/** Largest font size (px) at which `text` fits `width` on one line (approx. glyph width ratio). */
+const fitSize = (text, max, width, ratio) => Math.floor(Math.min(max, width / (Math.max(1, String(text).length) * ratio)));
+/** Text cards wrap: size so the longest word fits and it stays within ~4 lines. */
+const fitWords = (text) => {
+  const longest = Math.max(...String(text).split(/\s+/).map((w) => w.length), 1);
+  return Math.min(128, fitSize("x".repeat(longest), 128, 900, 0.62), Math.floor(128 * Math.sqrt(22 / Math.max(22, String(text).length))));
+};
+
 function shotHtml(s, i) {
   const common = `class="clip shot" id="shot${i}" data-start="${f(s.start)}" data-duration="${f(s.end - s.start)}" style="z-index:${10 + i}"`;
   const v = s.visual || {};
@@ -24,11 +32,11 @@ function shotHtml(s, i) {
     return `<div ${common}><div class="card cta"><img class="logo" src="assets/ai-accountant-a-star-white.svg" alt=""><div class="cta-kicker">Full breakdown</div><div class="cta-url">aiaccountant.com</div><div class="cta-sub">Free guide on the blog</div></div></div>`;
   }
   if (type === "stat") {
-    return `<div ${common}><div class="card stat"><div class="glow"></div><div class="stat-val" data-count="${esc(v.value || "")}">${esc(v.value || "")}</div><div class="stat-label">${esc(v.label || "")}</div></div></div>`;
+    return `<div ${common}><div class="card stat"><div class="glow"></div><div class="stat-val" style="font-size:${fitSize(v.value, 230, 900, 0.6)}px" data-count="${esc(v.value || "")}">${esc(v.value || "")}</div><div class="stat-label">${esc(v.label || "")}</div></div></div>`;
   }
   // text card (also the fallback when no footage was found)
   const txt = type === "fallback" ? s.beatText : v.value || s.beatText;
-  return `<div ${common}><div class="card text ${i % 2 ? "alt" : ""}"><div class="card-text">${esc(txt)}</div></div></div>`;
+  return `<div ${common}><div class="card text ${i % 2 ? "alt" : ""}"><div class="card-text" style="font-size:${fitWords(txt)}px">${esc(txt)}</div></div></div>`;
 }
 
 function captionHtml(c, i) {
@@ -155,7 +163,7 @@ const CSS = `
       .cap { display: flex; align-items: center; justify-content: center; top: 1110px; bottom: auto; height: 300px; padding: 0 70px; }
       .cap-line { text-align: center; font-weight: 900; font-size: 104px; line-height: 1.08; letter-spacing: -0.02em; color: #fff; text-transform: uppercase;
         -webkit-text-stroke: 14px #000; paint-order: stroke fill; text-shadow: 0 10px 30px rgba(0,0,0,.6); }
-      .cap-line .w { display: inline-block; }
+      .cap-line .w { display: inline-block; margin: 0 0.1em; }
       .cap-line .w.long { font-size: 78px; }
       .cap-line .w.hot { color: var(--hot); }
       #brand { position: absolute; z-index: 600; top: 92px; bottom: auto; height: 60px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 16px;

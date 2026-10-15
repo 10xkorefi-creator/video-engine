@@ -56,14 +56,16 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
     try {
       const cacheFile = path.join(config.cacheDir, "research", `${date}-${slugify(blogUrl)}.json`);
       research = await readFile(cacheFile, "utf8").then(JSON.parse).catch(() => null);
-      if (!research) {
+      if (!research && config.researchResults > 0) {
         research = await step("research", () => doResearch(blog));
         costs.add("research_llm", research.cost);
         await mkdir(path.dirname(cacheFile), { recursive: true });
         await writeFile(cacheFile, JSON.stringify(research, null, 1));
       }
+      research ||= { keyword: blog.title, notes: [], conflicts: [] };
     } catch (e) {
       log(`  research skipped: ${e.message}`);
+      research = { keyword: blog.title, notes: [], conflicts: [] };
     }
 
     let { script } = await step("script", () => scriptWithChecks(blog, angle, costs, { research }), { retries: 0 });
