@@ -22,7 +22,11 @@ export async function chatJSON({ model, system, user, maxTokens = 8000, temperat
       response_format: { type: "json_object" },
       reasoning: { effort },
       usage: { include: true },
-      messages: [{ role: "system", content: system }, { role: "user", content: user }],
+      messages: [
+        // Cache the long, constant system prompt: repeat drafts pay ~10% for it.
+        { role: "system", content: system.length > 4000 ? [{ type: "text", text: system, cache_control: { type: "ephemeral" } }] : system },
+        { role: "user", content: user },
+      ],
     }),
   }, 180_000);
   const data = await res.json();

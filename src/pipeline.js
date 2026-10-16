@@ -20,7 +20,7 @@ const PAUSE = 0.35;
 export async function scriptWithChecks(blog, angle, costs, opts = {}) {
   let feedback = opts.feedback || "";
   let lastIssues = [];
-  let previous = null;
+  let previous = opts.previous || null;
   for (let attempt = 0; attempt < 3; attempt++) {
     const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords, research: opts.research, previous });
     previous = script;
@@ -111,7 +111,8 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
       const words = scriptPlain(script).split(/\s+/).length;
       const targetSec = total > maxS ? maxS - 6 : (config.minSeconds + config.maxSeconds) / 2;
       const targetWords = Math.round(words * (targetSec - LEAD - TAIL - PAUSE) / audioDur);
-      ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords, research }), { retries: 0 }));
+      ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords, research, previous: script,
+        feedback: `The voice-over came out at ${total.toFixed(0)} seconds; it must be ${config.minSeconds}-${maxS} seconds. ${total > maxS ? "Shorten" : "Lengthen"} the script to about ${targetWords} spoken words by ${total > maxS ? "cutting or merging the least important beats" : "adding one story beat"}; keep the hook, twist, takeaway and CTA.` }), { retries: 0 }));
     }
 
     const stt = await step("timing", () => transcribe(voicePath));

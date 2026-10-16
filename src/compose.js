@@ -30,7 +30,7 @@ function shotHtml(s, i) {
     return `<div ${common}><div class="kb"><img src="${s.asset.file}" alt=""></div><div class="shade"></div></div>`;
   }
   if (type === "scene") {
-    return `<div ${common}>${sceneHtml(v)}</div>`;
+    return `<div ${common}>${sceneHtml(v, { brand: /AI\s*Accountant|AiA/i.test(s.beatText || "") })}</div>`;
   }
   if (s.role === "cta") {
     return `<div ${common}><div class="card cta"><img class="logo" src="assets/ai-accountant-a-star-white.svg" alt=""><div class="cta-kicker">Full breakdown</div><div class="cta-url">aiaccountant.com</div><div class="cta-sub">Free guide on the blog</div></div></div>`;

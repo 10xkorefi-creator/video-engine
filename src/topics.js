@@ -5,7 +5,6 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { ROOT, config } from "./config.js";
-import { chatJSON } from "./openrouter.js";
 import { http, log as defaultLog, slugify } from "./util.js";
 
 const OR_BASE = "https://openrouter.ai/api/v1";
@@ -262,7 +261,7 @@ export async function collectCompetitors({ log = defaultLog, cap = 300 } = {}) {
 // ---------------------------------------------------------------------------
 // 4. Community discussions (one OpenRouter web-search call; Reddit blocks direct fetch)
 // ---------------------------------------------------------------------------
-export async function collectCommunity({ model = config.researchModel, maxResults = 10 } = {}) {
+export async function collectCommunity({ model = config.researchModel, maxResults = 8 } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (config.openrouterKey) headers.Authorization = `Bearer ${config.openrouterKey}`;
   const res = await http(`${OR_BASE}/chat/completions`, {
@@ -274,11 +273,12 @@ export async function collectCommunity({ model = config.researchModel, maxResult
       max_tokens: 3000,
       reasoning: { effort: "low" },
       usage: { include: true },
-      plugins: [{ id: "web", max_results: maxResults }],
+      // engine "exa" pins cost (~$0.004/result); native Anthropic search can fan out into several paid searches.
+      plugins: [{ id: "web", engine: "exa", max_results: maxResults }],
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: `You find real questions Indian small-business founders, finance heads and in-house accountants ask online. Today: ${new Date().toISOString().slice(0, 10)}. Only report questions you actually saw in search results (Reddit r/IndiaTax, r/IndianStartups, r/CAIndia, r/smallbusinessindia, Quora, Tally/GST forums). Return ONLY JSON: {"questions":[{"question":"the question as asked, paraphrased only to remove names","url":"https://...","theme":"gst|tds|tally|bookkeeping|cash_flow|notices|other"}]}. 10-20 items, no personal names.` },
-        { role: "user", content: "Search for the most-discussed recent founder/accountant pain questions in India about GST notices, GSTR-2B/ITC mismatch, TDS, Tally entries, bookkeeping, accountant dependency, and cash flow / MSME payments. Use searches like: site:reddit.com IndiaTax GST notice small business; site:reddit.com CAIndia Tally; site:quora.com GST input tax credit mismatch business." },
+        { role: "system", content: `You find real questions Indian small-business founders, finance heads and in-house accountants ask online. Today: ${new Date().toISOString().slice(0, 10)}. Only report questions you actually saw in search results (Reddit r/IndiaTax, r/IndianStartups, r/CAIndia, r/smallbusinessindia, Quora, Tally/GST forums). Return ONLY JSON: {"questions":[{"question":"the question as asked, paraphrased only to remove names","url":"https://...","theme":"gst|tds|tally|bookkeeping|cash_flow|notices|other"}]}. 10-20 items across different themes (not only ITC), no personal names. Prefer threads from the last 12 months.` },
+        { role: "user", content: "reddit IndiaTax IndianStartups CAIndia small business owner questions GST notice, ITC mismatch GSTR-2B, TDS default, Tally entries, accountant left, bookkeeping, cash flow" },
       ],
     }),
   }, 180_000);
@@ -426,10 +426,42 @@ const productSummary = () => {
   } catch { return "AI automation layer on top of TallyPrime: reads bank statements and vendor bills, maps to ledgers, matches payments, GSTR-2B reconciliation, posts to Tally after review."; }
 };
 
+/**
+ * Like chatJSON, but always reports cost and salvages a truncated {"topics":[...]}
+ * reply (finish=length) by cutting back to the last complete topic object.
+ */
+async function clusterCall({ model, system, user, maxTokens }) {
+  const headers = { "Content-Type": "application/json", "HTTP-Referer": "https://www.aiaccountant.com", "X-Title": "AIA reel engine" };
+  if (config.openrouterKey) headers.Authorization = `Bearer ${config.openrouterKey}`;
+  const res = await http(`${OR_BASE}/chat/completions`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      model, temperature: 0.4, max_tokens: maxTokens, response_format: { type: "json_object" },
+      reasoning: { effort: "low" }, usage: { include: true },
+      messages: [{ role: "system", content: system }, { role: "user", content: user }],
+    }),
+  }, 600_000);
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content || "";
+  const finish = data.choices?.[0]?.finish_reason;
+  const cost = data.usage?.cost ?? 0;
+  const start = content.indexOf("{");
+  let json;
+  try { json = JSON.parse(content.slice(start, content.lastIndexOf("}") + 1)); } catch {
+    // Salvage: find the last '}' that closes a topic object at array depth and close the array.
+    for (let end = content.lastIndexOf("}"); end > start && !json; end = content.lastIndexOf("}", end - 1)) {
+      try { json = JSON.parse(content.slice(start, end + 1) + "]}"); } catch {}
+    }
+  }
+  if (!json?.topics?.length) throw Object.assign(new Error(`clustering returned no parseable topics (finish=${finish}, cost=$${cost})`), { cost });
+  return { json, cost, usage: data.usage, finish };
+}
+
 // ---------------------------------------------------------------------------
 // Orchestration
 // ---------------------------------------------------------------------------
-export async function discoverTopics({ log = defaultLog, target = 72, clusterModel = config.scriptModel, cluster = true, only = null } = {}) {
+export async function discoverTopics({ log = defaultLog, target = 72, clusterModel = config.scriptModel, cluster = true, only = null, maxTokens = 28000 } = {}) {
   const collectors = {
     autocomplete: () => collectAutocomplete({ log }),
     sales_calls: () => collectSalesCalls(),
@@ -462,13 +494,13 @@ export async function discoverTopics({ log = defaultLog, target = 72, clusterMod
   if (!cluster) return { topics: [], stats, cost, signals, signalText };
   log(`clustering ${signalText.length} chars (~${stats.clustering.approx_input_tokens} tokens) with ${clusterModel}`);
   const blogs = signals.blog?.items || [];
-  const { json, cost: cCost, usage } = await chatJSON({
+  const { json, cost: cCost, usage, finish } = await clusterCall({
     model: clusterModel,
     system: clusterPrompt(productSummary(), target),
     user: `DEMAND SIGNALS\n\n${signalText}`,
-    maxTokens: 16000,
-    temperature: 0.4,
+    maxTokens,
   });
+  stats.clustering.finish_reason = finish;
   cost.clustering = cCost;
   cost.total = Number((cost.community + cost.clustering).toFixed(5));
   stats.clustering.usage = usage ? { prompt_tokens: usage.prompt_tokens, completion_tokens: usage.completion_tokens } : null;
@@ -482,22 +514,25 @@ export async function discoverTopics({ log = defaultLog, target = 72, clusterMod
 // ---------------------------------------------------------------------------
 // Using the bank
 // ---------------------------------------------------------------------------
-/** Topics from config/topics.json, or CACHE_DIR/topics.json when it exists and is newer. */
+/**
+ * The topic bank from config/topics.json, or CACHE_DIR/topics.json when it exists and is newer.
+ * Returns the whole document ({generated_at, stats, cost, topics, file}) with topics sorted by priority.
+ */
 export function loadTopics() {
   const cached = path.join(config.cacheDir, "topics.json");
   let file = TOPICS_FILE;
   if (existsSync(cached) && (!existsSync(TOPICS_FILE) || statSync(cached).mtimeMs > statSync(TOPICS_FILE).mtimeMs)) file = cached;
-  if (!existsSync(file)) return [];
-  const doc = JSON.parse(readFileSync(file, "utf8"));
-  const topics = Array.isArray(doc) ? doc : doc.topics || [];
-  return [...topics].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  if (!existsSync(file)) return { topics: [], file: null };
+  const raw = JSON.parse(readFileSync(file, "utf8"));
+  const doc = Array.isArray(raw) ? { topics: raw } : raw;
+  return { ...doc, file, topics: [...(doc.topics || [])].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)) };
 }
 
 /**
  * Next `count` unused topics by priority. Rotates aia_fit so consecutive picks
  * differ when a candidate within the next few by priority allows it.
  */
-export function nextTopics(usedIds = [], count = 2, { topics = loadTopics(), lastFit = null, window = 6 } = {}) {
+export function nextTopics(usedIds = [], count = 2, { topics = loadTopics().topics, lastFit = null, window = 6 } = {}) {
   const used = new Set(usedIds);
   const pool = topics.filter((t) => !used.has(t.id));
   const picks = [];

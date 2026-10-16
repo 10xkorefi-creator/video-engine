@@ -1,0 +1,2703 @@
+{
+ "generated_at": "2026-10-16T08:51:18.596Z",
+ "runtime_seconds": 170,
+ "count": 73,
+ "stats": {
+  "blog": {
+   "ok": true,
+   "seconds": 0,
+   "blogs": 45
+  },
+  "chatgpt_gaps": {
+   "ok": true,
+   "seconds": 1.3,
+   "rows": 60
+  },
+  "trends": {
+   "ok": true,
+   "seconds": 1.6,
+   "rows": 80,
+   "window_days": 30,
+   "stale_fallback": true,
+   "newest": "2026-08-25"
+  },
+  "raw_questions": {
+   "ok": true,
+   "seconds": 2,
+   "rows": 326
+  },
+  "sales_calls": {
+   "ok": true,
+   "seconds": 5.6,
+   "demos": 600,
+   "demos_in_window": 2809,
+   "since": "2026-04-19",
+   "pains": 2095,
+   "questions": 560,
+   "content_gaps": 1310
+  },
+  "competitor": {
+   "ok": true,
+   "seconds": 8.4,
+   "zoho_books": {
+    "urls_seen": 141,
+    "articles": 83,
+    "kept": 78
+   },
+   "busy": {
+    "urls_seen": 1127,
+    "articles": 853,
+    "kept": 255
+   },
+   "vyapar": {
+    "urls_seen": 119,
+    "articles": 115,
+    "kept": 115
+   },
+   "tallysolutions": {
+    "urls_seen": 1619,
+    "articles": 1494,
+    "kept": 300
+   },
+   "cleartax": {
+    "urls_seen": 2072,
+    "articles": 557,
+    "kept": 300
+   },
+   "suvit": {
+    "urls_seen": 2558,
+    "articles": 1007,
+    "kept": 299
+   }
+  },
+  "community": {
+   "ok": true,
+   "seconds": 21.4,
+   "questions": 4,
+   "cited_urls": 0
+  },
+  "autocomplete": {
+   "ok": true,
+   "seconds": 54.3,
+   "calls": 476,
+   "failures": 0,
+   "unique": 1969,
+   "google": 1164,
+   "youtube": 977,
+   "hindi": 573
+  },
+  "clustering": {
+   "input_chars": 155455,
+   "approx_input_tokens": 40909,
+   "finish_reason": "stop",
+   "usage": {
+    "prompt_tokens": 60240,
+    "completion_tokens": 21037
+   },
+   "topics": 73,
+   "aia_fit": {
+    "indirect": 27,
+    "direct": 25,
+    "none": 21
+   }
+  }
+ },
+ "cost": {
+  "community": 0.1425025,
+  "clustering": 0.33085,
+  "total": 0.47335
+ },
+ "priority_formula": "signal_score + 0.9*min(distinct_sources,6) + 0.5 if autocomplete&youtube + 1 if sales_calls + audience weight (founder 1.5, ceo 1.2, finance_head 1.0, accountant 0.6) + 0.3 if evergreen",
+ "topics": [
+  {
+   "id": "gstr2b-reconciliation-manual",
+   "title": "GSTR-2B Reconciliation Without the Excel Nightmare",
+   "problem": "How do you match your purchase register with GSTR-2B every month without line-by-line VLOOKUP?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Missed mismatches mean lost input tax credit and GST notices.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "sales_calls",
+     "youtube",
+     "blog",
+     "community",
+     "competitor"
+    ],
+    "signal_score": 10,
+    "examples": [
+     "gstr 2b reconciliation in tally prime",
+     "Manual GST 2B reconciliation using VLOOKUP",
+     "gstr 2b reconciliation in excel",
+     "Manual GST 2B reconciliation x8",
+     "2 invoices missing from 2B, claim ITC in 3B?"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "smart founders vs others"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/automate-gst-2b-reconciliation",
+   "evergreen": true,
+   "priority": 18.7,
+   "rank": 1
+  },
+  {
+   "id": "purchase-bill-entry-tally",
+   "title": "Purchase Bill Entry in Tally, Faster",
+   "problem": "What is the right way to enter purchase bills in TallyPrime, and how do you stop it eating your day?",
+   "audience": [
+    "accountant",
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "4-6 minutes per bill adds up to days each month.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "sales_calls",
+     "youtube",
+     "blog"
+    ],
+    "signal_score": 10,
+    "examples": [
+     "purchase bill entry in tally prime",
+     "purchase bill ki entry kaise kare",
+     "Manual entry of 250+ purchase bills every month",
+     "Manual data entry for purchase bills takes 4-6 minutes each"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "hidden cost",
+    "smart founders vs others"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/purchase-bill-entry-in-tally",
+   "evergreen": true,
+   "priority": 16.9,
+   "rank": 2
+  },
+  {
+   "id": "bank-reconciliation-manual",
+   "title": "Bank Reconciliation: Stop Typing Thousands of Bank Lines",
+   "problem": "How can bank statement entries and reconciliation in Tally be done without hours of manual work?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Half a day of staff time every month and errors in cash numbers.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "sales_calls",
+     "youtube"
+    ],
+    "signal_score": 10,
+    "examples": [
+     "bank reconciliation kaise kare",
+     "bank reconciliation in tally prime",
+     "Manual bank reconciliation x8",
+     "Manual bank entry takes half a day",
+     "7,000-8,000 bank transactions a month"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "smart founders vs others"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/automated-statement-reconciliation-india",
+   "evergreen": true,
+   "priority": 16,
+   "rank": 3
+  },
+  {
+   "id": "debit-credit-note",
+   "title": "Debit Note vs Credit Note Explained",
+   "problem": "What is the difference and how are they entered in GST and Tally?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Wrong notes distort ITC and outstanding balances.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "blog",
+     "sales_calls"
+    ],
+    "signal_score": 9,
+    "examples": [
+     "debit note credit note difference",
+     "debit note credit note in tally prime",
+     "how to enter debit note and credit note in tally prime",
+     "How to handle debit notes / credit notes / purchase returns"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "myth vs reality",
+    "why behind the rule"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/debit-note-in-gst",
+   "evergreen": true,
+   "priority": 15.9,
+   "rank": 4
+  },
+  {
+   "id": "reverse-charge-rcm",
+   "title": "Reverse Charge (RCM): Who Pays the GST",
+   "problem": "When must you pay GST under reverse charge, e.g. on rent and transport, and how to record it?",
+   "audience": [
+    "founder",
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Missed RCM means unpaid tax and denied ITC.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "sales_calls",
+     "blog"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "gst reverse charge kya hai",
+     "reverse charge gst on rent",
+     "reverse charge gst on transportation",
+     "tally entry for rcm under gst",
+     "Handling RCM transport entries via LR copies"
+    ]
+   },
+   "suggested_angles": [
+    "why behind the rule",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/reverse-charge-mechanism-accounting-india",
+   "evergreen": true,
+   "priority": 14.9,
+   "rank": 5
+  },
+  {
+   "id": "gstr1-vs-3b-mismatch",
+   "title": "GSTR-1 vs GSTR-3B Mismatch: What to Do",
+   "problem": "Why do GSTR-1 and 3B differ and how do you fix it before a notice arrives?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Mismatches trigger notices, interest and ITC blocks.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "blog"
+    ],
+    "signal_score": 9,
+    "examples": [
+     "gstr 1 and 3b mismatch",
+     "gstr 3b and 1 mismatch notice reply format",
+     "gstr 1 gstr 3b mismatch refund",
+     "gstr-3b and gstr-1 mismatch solution"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "why behind the rule",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/match-gstr1-with-gstr3b-totals",
+   "evergreen": true,
+   "priority": 14,
+   "rank": 6
+  },
+  {
+   "id": "gst-notice-reply",
+   "title": "Got a GST Notice? How to Check and Reply",
+   "problem": "How do you find a GST notice on the portal and reply correctly?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Missed notices lead to penalties and ex-parte orders.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "news"
+    ],
+    "signal_score": 9,
+    "examples": [
+     "gst notice ka reply kaise de",
+     "gst notice kaise check kare",
+     "gst notice time limit",
+     "gst notice reply online",
+     "GST Notices Uploaded Only on Portal"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 14,
+   "rank": 7
+  },
+  {
+   "id": "itc-reversal",
+   "title": "ITC Reversal: When and How",
+   "problem": "When must you reverse input tax credit and how is it done under Rules 37, 42, 43 and 17(5)?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Wrong reversal means interest, penalty or lost credit.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "news"
+    ],
+    "signal_score": 9,
+    "examples": [
+     "itc reversal kaise kare",
+     "itc reversal rule 42 & 43",
+     "itc reversal as per rule 37",
+     "itc reversal entry in tally",
+     "Excess ITC Availment demand"
+    ]
+   },
+   "suggested_angles": [
+    "why behind the rule",
+    "what happens if you ignore it",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 14,
+   "rank": 8
+  },
+  {
+   "id": "msme-45-day-rule",
+   "title": "MSME 45-Day Payment Rule",
+   "problem": "What does paying MSME vendors within 45 days mean for your tax deduction?",
+   "audience": [
+    "founder",
+    "ceo",
+    "finance_head"
+   ],
+   "why_it_matters": "Late payments can disallow the expense under Section 43B(h).",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "competitor"
+    ],
+    "signal_score": 9,
+    "examples": [
+     "msme payment within 45 days",
+     "msme payment 45 days section 43b",
+     "msme payment 45 days disallowance",
+     "msme payment within 45 days penalty"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "hidden cost",
+    "why behind the rule"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": false,
+   "priority": 13.7,
+   "rank": 9
+  },
+  {
+   "id": "e-invoice-basics",
+   "title": "E-Invoicing: Who Needs It and What Goes Wrong",
+   "problem": "What is e-invoicing, the turnover limit, and why do errors or penalties occur?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Missing IRN makes invoices invalid and risks penalty.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "chatgpt",
+     "competitor"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "e invoice kya hai",
+     "e invoice limit",
+     "e invoice error code 2150",
+     "e invoice penalty",
+     "why e invoice rejected in tally prime"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "what happens if you ignore it",
+    "myth vs reality"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": false,
+   "priority": 13.6,
+   "rank": 10
+  },
+  {
+   "id": "tds-return-filing",
+   "title": "TDS Return Filing and Due Dates",
+   "problem": "How is TDS deducted, paid and returned, and what if you are late?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Late filing attracts fees and interest.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "blog",
+     "news"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "tds return kaise file kare",
+     "tds return due date",
+     "tds penalty for late filing of return",
+     "tds return due date for fy 2026-27"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "explained in 60 seconds",
+    "hidden cost"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/tds-filing-due-date",
+   "evergreen": false,
+   "priority": 13.6,
+   "rank": 11
+  },
+  {
+   "id": "e-way-bill",
+   "title": "E-Way Bill: Rules, Limit and Penalty",
+   "problem": "When is an e-way bill needed and what happens if details are wrong?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Goods in transit can be detained and penalised.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "competitor"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "e way bill kaise banaye",
+     "e way bill limit",
+     "e way bill mistake penalty",
+     "e way bill penalty if vehicle number is wrong",
+     "e way bill error in tally prime"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 13,
+   "rank": 12
+  },
+  {
+   "id": "gstr2b-what-is",
+   "title": "What Is GSTR-2B and Why It Decides Your ITC",
+   "problem": "What does GSTR-2B contain, and how do you download and read it?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "ITC can only be claimed on what shows in 2B.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "blog"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "gstr 2b kya hai in hindi",
+     "gstr 2b kaise download kare",
+     "gstr 2a and 2b kya hai",
+     "gstr 2b due date",
+     "What is GST 2B - what details does it give?"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "2a vs 2b myth vs reality",
+    "why behind the rule"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/2a-vs-2b-gst-itc",
+   "evergreen": true,
+   "priority": 13,
+   "rank": 13
+  },
+  {
+   "id": "input-tax-credit-basics",
+   "title": "Input Tax Credit: How to Claim It Right",
+   "problem": "What is ITC, who can claim it and what conditions apply?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Wrong claims cost cash and invite penalties.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "competitor"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "input tax credit kya hai in hindi",
+     "gst input tax credit kaise check kare",
+     "how to claim input tax credit in gst",
+     "penalty on wrong input tax credit"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "myth vs reality",
+    "what happens if you ignore it"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 13,
+   "rank": 14
+  },
+  {
+   "id": "gst-registration",
+   "title": "GST Registration: Process, Documents and Rejections",
+   "problem": "How do you register for GST and why do applications get rejected?",
+   "audience": [
+    "founder"
+   ],
+   "why_it_matters": "Delays block invoicing and ITC.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "blog",
+     "news"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "gst registration kaise kare",
+     "gst registration documents",
+     "why gst registration is rejected",
+     "gst registration limit",
+     "GST Registration For Big Biz: uniform documents"
+    ]
+   },
+   "suggested_angles": [
+    "myth vs reality",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/how-to-download-gst-registration-certificate",
+   "evergreen": true,
+   "priority": 12.9,
+   "rank": 15
+  },
+  {
+   "id": "handwritten-bills",
+   "title": "Handwritten and Messy Bills Kill Your Books",
+   "problem": "How do you process handwritten, faded or photo bills without retyping?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Bad bills cause delays, errors and missed ITC.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "blog"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "Poor quality / greyed-out / handwritten bills hard to process",
+     "Handwritten bills from some vendors",
+     "Does it read handwritten bills?",
+     "Does it extract handwritten bills in mixed English and Hindi?"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "myth vs reality",
+    "founder mistake story"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/handwritten-invoice-processing-india",
+   "evergreen": true,
+   "priority": 12.6,
+   "rank": 16
+  },
+  {
+   "id": "real-time-numbers-founder",
+   "title": "Know Cash, Receivables and Payables Without Asking",
+   "problem": "How can an owner see cash, who owes me and what I owe in real time?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Slow numbers mean late decisions and cash surprises.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "chatgpt"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "Delays in getting specific data when needed from team",
+     "Having to ask team every day for data",
+     "No proper dashboard/financial visibility in current Tally",
+     "cfo financial dashboards tally data"
+    ]
+   },
+   "suggested_angles": [
+    "smart founders vs others",
+    "hidden cost",
+    "founder mistake story"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 12.6,
+   "rank": 17
+  },
+  {
+   "id": "tds-on-bills",
+   "title": "TDS on Vendor Bills: When and How Much",
+   "problem": "When should you deduct TDS on a vendor bill and how do you book it?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Missed TDS causes disallowance and interest.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "autocomplete",
+     "competitor"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "tds kaise nikale",
+     "Is TDS a separate entry or included in the bill?",
+     "How do we add TDS if it needs to be applied to a bill?",
+     "Can I get a list of all TDS to be deposited by end of month?"
+    ]
+   },
+   "suggested_angles": [
+    "why behind the rule",
+    "what happens if you ignore it",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/if-tds-paid-after-due-date",
+   "evergreen": true,
+   "priority": 12.5,
+   "rank": 18
+  },
+  {
+   "id": "gst-late-fee",
+   "title": "GST Late Fee and Interest: What You Owe",
+   "problem": "How is the GST late fee calculated for delayed or nil returns?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Per-day fees pile up even on nil returns.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "gst late fees per day",
+     "gst late fee for nil return",
+     "gst late fee calculator",
+     "gst return penalty for late filing"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "what happens if you ignore it",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 12.1,
+   "rank": 19
+  },
+  {
+   "id": "bank-reconciliation-basics",
+   "title": "Bank Reconciliation Statement Explained",
+   "problem": "What is a BRS and why do bank and book balances differ?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Unreconciled differences hide errors and fraud.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "bank reconciliation statement",
+     "bank reconciliation kya hai in hindi",
+     "why bank reconciliation statement is prepared",
+     "bank reconciliation errors examples"
+    ]
+   },
+   "suggested_angles": [
+    "why behind the rule",
+    "myth vs reality",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 12.1,
+   "rank": 20
+  },
+  {
+   "id": "profit-and-loss-read",
+   "title": "Profit and Loss Statement in Plain Language",
+   "problem": "How do you read your P&L and calculate profit correctly?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Wrong profit view leads to bad pricing and spending.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "sales_calls"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "profit and loss kaise nikale",
+     "profit and loss kya hota hai",
+     "profit and loss account kya hai",
+     "Wants P&L and summary reports"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "myth vs reality",
+    "smart founders vs others"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 12,
+   "rank": 21
+  },
+  {
+   "id": "tally-entry-basics",
+   "title": "Tally Voucher Entries Explained",
+   "problem": "How do payment, receipt, contra and journal entries work in Tally?",
+   "audience": [
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Wrong voucher types distort reports.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "community"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "tally entry kaise kare",
+     "tally me contra entry kya hota hai",
+     "tally me journal entry kya hai",
+     "tally voucher entry kaise kare",
+     "How do I record credit card transactions in Tally?"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "why behind the rule",
+    "myth vs reality"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/all-tally-prime-shortcut-keys-list",
+   "evergreen": true,
+   "priority": 12,
+   "rank": 22
+  },
+  {
+   "id": "gst-return-types",
+   "title": "GST Returns Explained: GSTR-1, 3B, 9",
+   "problem": "Which GST returns must you file, and when?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Missed returns mean late fees and blocked e-way bills.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "blog"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "gst return kya hota hai",
+     "gst r3b return kya hai",
+     "gst return due date",
+     "gst annual return kya hai",
+     "gst return filing mistakes"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "what happens if you ignore it",
+    "myth vs reality"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 12,
+   "rank": 23
+  },
+  {
+   "id": "accountant-dependency",
+   "title": "Accountant Left? Books Stuck?",
+   "problem": "How do you keep books current when accountants resign, take leave or are hard to hire?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Backlogs delay GST filing and decisions.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 8,
+    "examples": [
+     "Difficulty hiring and retaining a good bookkeeper",
+     "High employee turnover requiring constant retraining",
+     "Previous accountant left, owner handling everything alone",
+     "Dependency on part-time accountant"
+    ]
+   },
+   "suggested_angles": [
+    "founder mistake story",
+    "hidden cost",
+    "smart founders vs others"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 11.7,
+   "rank": 24
+  },
+  {
+   "id": "missing-invoices-2b-itc",
+   "title": "Supplier Invoice Missing in 2B: Claim ITC or Not?",
+   "problem": "If a bill is in your books but not in GSTR-2B, can you still claim ITC?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Claiming it wrongly triggers reversal and interest.",
+   "evidence": {
+    "sources": [
+     "community",
+     "sales_calls"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "My books show ITC ₹5,000 more than GSTR-2B",
+     "two invoices missing from 2B. Claim in 3B?",
+     "Tracking invoices missing in 2B and reversing ITC",
+     "If 100 invoices in GSTR2B but not in my purchase register"
+    ]
+   },
+   "suggested_angles": [
+    "founder mistake story",
+    "why behind the rule",
+    "what happens if you ignore it"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/reconcile-tally-gst-reports-ai",
+   "evergreen": true,
+   "priority": 11.6,
+   "rank": 25
+  },
+  {
+   "id": "high-volume-bills-cost",
+   "title": "What Manual Entry of 300 Bills a Month Really Costs",
+   "problem": "What is the real cost of an accountant typing hundreds of bills monthly?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Salary, errors and delay compound.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "chatgpt"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "Large volume of purchase invoices (300-400/month)",
+     "Paying 8000/month to accountant for data entry, bank TDL, GST and TDS work",
+     "roi of automating invoice data entry",
+     "average time for invoice data entry"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 11.6,
+   "rank": 26
+  },
+  {
+   "id": "cash-flow-basics",
+   "title": "Cash Flow: Why Profit Is Not Cash",
+   "problem": "How do you read and improve business cash flow?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Profitable firms still run out of cash.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "cash flow kaise badhaye",
+     "business me cash flow kaise badhaye",
+     "why cash flow is king",
+     "cash flow mistakes",
+     "cash flow statement kaise banate hain"
+    ]
+   },
+   "suggested_angles": [
+    "myth vs reality",
+    "founder mistake story",
+    "smart founders vs others"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 11.1,
+   "rank": 28
+  },
+  {
+   "id": "working-capital",
+   "title": "Working Capital: Formula and How to Improve It",
+   "problem": "How do you calculate working capital and why is yours negative?",
+   "audience": [
+    "founder",
+    "ceo",
+    "finance_head"
+   ],
+   "why_it_matters": "Poor working capital forces expensive borrowing.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "working capital kaise nikale",
+     "working capital formula",
+     "why working capital is negative",
+     "working capital how to improve",
+     "working capital days"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "hidden cost",
+    "smart founders vs others"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 11.1,
+   "rank": 29
+  },
+  {
+   "id": "balance-sheet-read",
+   "title": "How to Read Your Balance Sheet",
+   "problem": "How does an owner read a balance sheet, and why might it not balance?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Owners who cannot read it miss red flags.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "balance sheet kaise padhe",
+     "balance sheet kya hai in hindi",
+     "balance sheet not matching",
+     "what if balance sheet doesn't balance",
+     "balance sheet mistakes"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "myth vs reality",
+    "smart founders vs others"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 11.1,
+   "rank": 30
+  },
+  {
+   "id": "bookkeeping-basics",
+   "title": "Bookkeeping vs Accounting: What Your Business Needs",
+   "problem": "What is bookkeeping, how is it different from accounting, and how should a business start?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Messy books cost money at audit and filing time.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "bookkeeping vs accounting",
+     "bookkeeping kaise kare",
+     "why bookkeeping is important in business",
+     "bookkeeping mistakes to avoid",
+     "penalty for bookkeeping"
+    ]
+   },
+   "suggested_angles": [
+    "myth vs reality",
+    "hidden cost",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 11.1,
+   "rank": 31
+  },
+  {
+   "id": "whatsapp-bills",
+   "title": "Bills Coming on WhatsApp: Stop Download-and-Retype",
+   "problem": "How do you handle vendor and driver bills that arrive on WhatsApp?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Bills get lost and booked late.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "Bills received on WhatsApp from drivers need processing",
+     "Bills received via WhatsApp needing manual download and upload",
+     "Manual entry of invoices received on WhatsApp/Telegram into Tally"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.7,
+   "rank": 32
+  },
+  {
+   "id": "duplicate-bills",
+   "title": "Duplicate Bills Slipping Into Your Books",
+   "problem": "How do you stop the same vendor bill being booked and paid twice?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Double payments and inflated expenses.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "If I upload the same bill twice, will it catch the duplicate?",
+     "If I accidentally sync the same transaction twice, will it allow duplicates?",
+     "If a duplicate is flagged, will it still allow me to push it to Tally?"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "founder mistake story",
+    "what happens if you ignore it"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.7,
+   "rank": 33
+  },
+  {
+   "id": "cost-center-project-profit",
+   "title": "Project-wise Profit with Cost Centres in Tally",
+   "problem": "How do you track cost and profit per site, project or villa in Tally?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Without it, loss-making projects stay hidden.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "Cost center allocation across multiple villas/projects",
+     "Need to track profit/loss site-wise across multiple construction sites",
+     "Cost center / file number tracking per project",
+     "Project-wise costing"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/construction-accounting-software",
+   "evergreen": true,
+   "priority": 10.7,
+   "rank": 34
+  },
+  {
+   "id": "payment-to-bill-matching",
+   "title": "Matching Payments to the Right Bills",
+   "problem": "How do you match part, combined or out-of-order customer payments to specific invoices?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Wrong matching hides overdue amounts.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 7,
+    "examples": [
+     "Mapping payments received under different names to sales bills",
+     "Can I split one bank payment against multiple outstanding bills?",
+     "What if the customer doesn't pay bills in FIFO order?",
+     "How is payment marked against a specific invoice?"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "founder mistake story"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.7,
+   "rank": 35
+  },
+  {
+   "id": "sales-invoice-reentry",
+   "title": "Re-typing Sales Invoices From Excel or Other Software",
+   "problem": "Why do teams re-enter sales invoices from Excel, Zoho, Busy or marketplaces into Tally?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Double entry wastes time and causes mismatches.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "chatgpt"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "Sales invoices prepared manually in Excel then re-entered into Tally",
+     "Manual re-entry of Zoho invoices into Tally",
+     "Sales data manually re-entered from Busy into Tally",
+     "khatabook or vyapar integrate with tally"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "founder mistake story"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.6,
+   "rank": 37
+  },
+  {
+   "id": "marketplace-sales-accounting",
+   "title": "Accounting for Amazon, Flipkart and Shopify Sales",
+   "problem": "How do you book marketplace sales, returns and TCS in Tally?",
+   "audience": [
+    "founder",
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Different formats cause errors and unreconciled settlements.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "chatgpt",
+     "competitor"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "Different Excel formats across 6-7 marketplaces",
+     "Manual sales entry from multiple channels",
+     "best bookkeeping app for e-commerce sellers in india",
+     "ecommerce accounting firms india gst reconciliation"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "founder mistake story"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.5,
+   "rank": 38
+  },
+  {
+   "id": "best-accounting-software-trader",
+   "title": "Tally vs Zoho vs Busy: Choosing for a 10 Crore Business",
+   "problem": "Which accounting software suits a trading or manufacturing SMB?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Switching later is painful and costly.",
+   "evidence": {
+    "sources": [
+     "chatgpt",
+     "competitor",
+     "sales_calls"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "best accounting software india trading company tally prime zoho books busy marg",
+     "how to choose the best accounting software for your business in 2026",
+     "Needs migration from Zoho to Tally",
+     "Uses Busy/Cloud, wants migration to Tally"
+    ]
+   },
+   "suggested_angles": [
+    "smart founders vs others",
+    "myth vs reality",
+    "hidden cost"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/best-accounting-software-for-small-businesses-in-india",
+   "evergreen": true,
+   "priority": 10.5,
+   "rank": 39
+  },
+  {
+   "id": "tally-integration-automation",
+   "title": "Connecting Tally With Other Tools Safely",
+   "problem": "How can bills, banks and apps flow into TallyPrime without breaking data?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Bad sync crashes backdated entries and corrupts books.",
+   "evidence": {
+    "sources": [
+     "chatgpt",
+     "sales_calls",
+     "blog"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "tally prime api odbc integration tools",
+     "tally connector zapier make tallyprime",
+     "CredFlow crashes on backdated entries, poor syncing mechanism",
+     "Tally version compatibility for sync"
+    ]
+   },
+   "suggested_angles": [
+    "myth vs reality",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/tally-integration-with-ai-accountant",
+   "evergreen": true,
+   "priority": 10.5,
+   "rank": 40
+  },
+  {
+   "id": "accounting-mistakes-owners",
+   "title": "Common Accounting Mistakes Owners Make",
+   "problem": "Which bookkeeping errors cost small businesses the most?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Small errors compound into tax and audit problems.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "competitor",
+     "sales_calls"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "accounting mistakes",
+     "common bookkeeping mistakes",
+     "Accountants make many mistakes in entries",
+     "Types of errors in accounting"
+    ]
+   },
+   "suggested_angles": [
+    "founder mistake story",
+    "hidden cost",
+    "smart founders vs others"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.5,
+   "rank": 41
+  },
+  {
+   "id": "outsourced-vs-inhouse-accounting",
+   "title": "In-house Accountant vs Outsourced Accounting",
+   "problem": "What does each option really cost and when should a growing SMB switch?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Wrong staffing choice is a recurring cost.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "blog",
+     "chatgpt"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "Cost of full accounting stack keeps increasing",
+     "Cost-benefit comparison vs full-time employee",
+     "outsourced accounting services for d2c brands in india",
+     "accountant salary"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "myth vs reality"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/virtual-accounting-cost-india-pricing",
+   "evergreen": true,
+   "priority": 10.5,
+   "rank": 42
+  },
+  {
+   "id": "audit-basics",
+   "title": "What Happens in a Business Audit",
+   "problem": "What is an audit, what does the auditor check and how do you prepare?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Poor prep means delays, penalties and qualifications.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "audit kaise kiya jata hai",
+     "audit how to prepare",
+     "audit mistakes",
+     "internal audit how to conduct",
+     "audit penalty after due date"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "what happens if you ignore it",
+    "myth vs reality"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.1,
+   "rank": 45
+  },
+  {
+   "id": "invoice-basics",
+   "title": "GST Tax Invoice: What Must Be on It",
+   "problem": "What mandatory details make a valid GST invoice and how do you fix mistakes?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Wrong invoices block customers' ITC and delay payment.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "gst invoice kya hai",
+     "invoice kaise banaye",
+     "tax invoice kya hai",
+     "invoice by mistake",
+     "proforma invoice kya hai"
+    ]
+   },
+   "suggested_angles": [
+    "myth vs reality",
+    "explained in 60 seconds",
+    "founder mistake story"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10.1,
+   "rank": 46
+  },
+  {
+   "id": "bill-adjustments-freight-discount",
+   "title": "Freight, Discount and Round-off in Purchase Bills",
+   "problem": "How do you book discounts, freight and round-off on a purchase bill in Tally?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Wrong ledgers distort cost and GST.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "sales_calls"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "purchase bill me discount ki entry kaise kare",
+     "purchase bill entry in tally prime with gst",
+     "Why do totals not match / voucher totals mismatch on synced bill",
+     "gst on freight charges"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "hidden cost",
+    "why behind the rule"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/gst-on-freight-charges",
+   "evergreen": true,
+   "priority": 10.1,
+   "rank": 47
+  },
+  {
+   "id": "income-tax-notice-business",
+   "title": "Income Tax Notice to a Business: First Steps",
+   "problem": "What do you do when a small business gets an income tax notice?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Ignoring notices adds penalties.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube",
+     "news"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "income tax notice to company",
+     "income tax notices for small business",
+     "income tax notice for high value transaction",
+     "income tax notice reply"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 10,
+   "rank": 48
+  },
+  {
+   "id": "payment-reminders-overdue",
+   "title": "Chasing Overdue Customer Payments",
+   "problem": "How do you follow up with customers who delay payment 30-60 days?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Late collections starve working capital.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "Payment follow-up / chasing customers is manual",
+     "Clients want automated payment reminders weekly",
+     "Can it send reminders for outstanding payments?",
+     "Sending ledgers/statements to customers monthly is repetitive"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "founder mistake story"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 9.7,
+   "rank": 49
+  },
+  {
+   "id": "gst-on-freight",
+   "title": "GST on Freight and Transport Charges",
+   "problem": "What GST applies to freight and transport and who pays?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Wrong treatment means lost ITC or tax shortfall.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "blog",
+     "sales_calls"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "reverse charge gst on transportation",
+     "reverse charge gst rate on transport",
+     "Handling RCM transport entries via LR copies"
+    ]
+   },
+   "suggested_angles": [
+    "why behind the rule",
+    "myth vs reality",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/gst-on-freight-charges",
+   "evergreen": true,
+   "priority": 9.5,
+   "rank": 50
+  },
+  {
+   "id": "unclear-upi-bank-narration",
+   "title": "Bank Entries With No Party Name",
+   "problem": "How do you map UPI and bank lines that show no clear vendor or customer name?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Suspense entries pile up and books stay wrong.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "UPI transactions lack proper names, hard to map manually",
+     "Bank statements sometimes lack full vendor/party name",
+     "When the bank statement doesn't have the party name, how does AI map it?",
+     "What happens to transactions that don't match any ledger?"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "myth vs reality",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/smart-narration-parsing-indian-statements",
+   "evergreen": true,
+   "priority": 9.2,
+   "rank": 51
+  },
+  {
+   "id": "gst-name-invoice-mismatch",
+   "title": "GST Recon Mismatches: Invoice Numbers, Names, Rounding",
+   "problem": "Why do invoice number, vendor name and rounding differences break GST reconciliation?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Small mismatches hide eligible ITC.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 6,
+    "examples": [
+     "GST reconciliation with invoice number mismatches is manual",
+     "GST name mismatches during reconciliation",
+     "Rounding-off differences cause reconciliation mismatches",
+     "GSTN number mismatch where invoice appears in both 2B and PR"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "myth vs reality"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/gstr-2b-reconciliation-tools-guide",
+   "evergreen": true,
+   "priority": 9.2,
+   "rank": 52
+  },
+  {
+   "id": "gst-registration-cancelled",
+   "title": "GST Registration Suspended or Cancelled: Revive It",
+   "problem": "What do you do if your GST registration is suspended or cancelled suo moto?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "You cannot invoice or claim ITC until it is restored.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "gst registration suspended how to activate",
+     "gst registration cancelled suo moto how to activate",
+     "gst registration error"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 9.1,
+   "rank": 53
+  },
+  {
+   "id": "tax-audit-penalty",
+   "title": "Tax Audit: Who Needs It and the Penalty",
+   "problem": "When is a tax audit mandatory and what is the penalty for missing it?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Missing it attracts a penalty on turnover.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "tax audit penalty",
+     "tax audit how to do",
+     "audit penalty after due date"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "why behind the rule",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 9.1,
+   "rank": 54
+  },
+  {
+   "id": "petty-cash-reimbursements",
+   "title": "Employee Reimbursements and Petty Cash",
+   "problem": "How do you handle reimbursement bills, imprest and entries without a bill?",
+   "audience": [
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Poor control leaks cash and misses GST/TDS rules.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "blog"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "Large volume of employee reimbursement bills",
+     "700-800 petty expense entries monthly done manually",
+     "Many small office/site expenses via impress accounts",
+     "How to handle entries with no bill like salary and reimbursements"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "why behind the rule",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/reimbursable-expenses-gst-tds-india",
+   "evergreen": true,
+   "priority": 9.1,
+   "rank": 55
+  },
+  {
+   "id": "tally-prime-errors",
+   "title": "Common TallyPrime Errors and Fixes",
+   "problem": "What do Tally error codes mean and how do you fix them?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Errors stall work and risk data issues.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "youtube"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "tally prime error",
+     "tally prime error code 1450",
+     "tally prime error code 0",
+     "tally prime error software exception c00005"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "founder mistake story",
+    "hidden cost"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 8.6,
+   "rank": 56
+  },
+  {
+   "id": "credit-card-statement-entries",
+   "title": "Credit Card Statements in Tally",
+   "problem": "How do you book credit card spends and split personal from business?",
+   "audience": [
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Mixed expenses hurt tax claims.",
+   "evidence": {
+    "sources": [
+     "community",
+     "sales_calls"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "How do I record credit card transactions in Tally?",
+     "Credit card data in Excel with personal/business segregation",
+     "upload credit card statement PDF and map expense heads"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "founder mistake story",
+    "hidden cost"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 8.6,
+   "rank": 57
+  },
+  {
+   "id": "month-end-close-speed",
+   "title": "Closing the Books Faster Every Month",
+   "problem": "Why does month-end close take weeks and how can you shorten it?",
+   "audience": [
+    "finance_head",
+    "founder"
+   ],
+   "why_it_matters": "Late closing delays decisions and GST filing.",
+   "evidence": {
+    "sources": [
+     "competitor",
+     "sales_calls"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "The 3 day month end close how continuous accounting is changing finance",
+     "Purchase bills arrive late (15 days to 1.5 months)",
+     "Bank transactions pile up if not done daily/weekly",
+     "Bills not booked timely, books not updated across multiple sites"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "founder mistake story"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 8.6,
+   "rank": 58
+  },
+  {
+   "id": "payables-ageing-dpo",
+   "title": "Payables Ageing: Who Do You Owe and When",
+   "problem": "How do you track what you owe vendors and avoid late payment issues?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Missed dues hurt vendor trust and MSME compliance.",
+   "evidence": {
+    "sources": [
+     "sales_calls",
+     "autocomplete"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "Can I get a payment reminder for payables after set days?",
+     "Cannot easily get bill-to-bill outstanding with PO number",
+     "msme payment due date",
+     "Tracking pending TDS/payments manually"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 8.6,
+   "rank": 59
+  },
+  {
+   "id": "item-name-mismatch-tally",
+   "title": "Vendor Item Names Don't Match Your Tally Stock Items",
+   "problem": "How do you handle bill descriptions differing from your item master?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Duplicate items corrupt stock reports.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "Item/stock item names do not match between bills and Tally masters",
+     "Stock item name mismatch between PDF/invoice and Tally",
+     "Technician changes item descriptions inconsistently in Tally"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "myth vs reality",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 8.2,
+   "rank": 60
+  },
+  {
+   "id": "tds-paid-late",
+   "title": "TDS Paid After Due Date: Interest and Penalty",
+   "problem": "What is the cost of paying or filing TDS late, and can you fix mistakes?",
+   "audience": [
+    "finance_head",
+    "accountant"
+   ],
+   "why_it_matters": "Interest accrues monthly and returns attract daily fees.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "blog"
+    ],
+    "signal_score": 5,
+    "examples": [
+     "tds penalty on late filing of return",
+     "how to rectify tds return mistakes",
+     "by mistake tds amount paid in interest",
+     "tds return error"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "hidden cost",
+    "founder mistake story"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/if-tds-paid-after-due-date",
+   "evergreen": true,
+   "priority": 8.1,
+   "rank": 61
+  },
+  {
+   "id": "data-loss-tally-backup",
+   "title": "Lost Your Tally Data? Backup Lessons",
+   "problem": "What if your Tally cloud vendor is hit by malware or your data expires?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Re-entering 1200 entries costs weeks.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "Lost accounting data due to malware attack on Tally cloud vendor",
+     "Backup and data recovery concerns with offline Tally cloud expiry",
+     "Does it take data/backup from my PC?"
+    ]
+   },
+   "suggested_angles": [
+    "founder mistake story",
+    "what happens if you ignore it",
+    "hidden cost"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 7.7,
+   "rank": 62
+  },
+  {
+   "id": "capital-entry-tally",
+   "title": "Recording Capital and Odd Owner Entries in Tally",
+   "problem": "How do you pass capital, drawing and no-cash share capital entries in Tally?",
+   "audience": [
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Wrong entries distort the balance sheet.",
+   "evidence": {
+    "sources": [
+     "community",
+     "sales_calls"
+    ],
+    "signal_score": 3,
+    "examples": [
+     "How do I pass this capital entry in Tally?",
+     "How ledger changes are handled (e.g. drawings account)",
+     "mobile recharge business Tally entries commission"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "founder mistake story",
+    "why behind the rule"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 7.6,
+   "rank": 63
+  },
+  {
+   "id": "ptec-ptrc",
+   "title": "PTEC and PTRC: Professional Tax Registration",
+   "problem": "What are PTEC and PTRC and which one does your business need?",
+   "audience": [
+    "founder",
+    "accountant"
+   ],
+   "why_it_matters": "Missing registration brings penalties.",
+   "evidence": {
+    "sources": [
+     "blog",
+     "competitor"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "ptec and ptrc registration",
+     "Ptec vs ptrc maharashtra"
+    ]
+   },
+   "suggested_angles": [
+    "myth vs reality",
+    "why behind the rule",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/ptec-and-ptrc-registration",
+   "evergreen": true,
+   "priority": 7.6,
+   "rank": 64
+  },
+  {
+   "id": "balance-sheet-finalization",
+   "title": "Year-End Balance Sheet Finalisation Checklist",
+   "problem": "What should you clean up before the CA finalises your balance sheet?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Suspense and unreconciled items delay audit.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "competitor"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "balance sheet finalization in tally",
+     "balance sheet finalization",
+     "Year end closing checklist finding and fixing accounting errors",
+     "Close books accounts sme checklist"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "founder mistake story",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 7.6,
+   "rank": 65
+  },
+  {
+   "id": "gst-2-0-rates",
+   "title": "GST 2.0: What Changed for Your Business",
+   "problem": "How do the new GST rates affect pricing, invoicing and ITC?",
+   "audience": [
+    "founder",
+    "ceo"
+   ],
+   "why_it_matters": "Wrong rates cause tax shortfall.",
+   "evidence": {
+    "sources": [
+     "news",
+     "competitor"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "How GST 2.0 is reshaping India's household budgets",
+     "Old vs new GST rates",
+     "57th GST council meeting 2026 key decisions",
+     "GST rate reclassification"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "what happens if you ignore it",
+    "myth vs reality"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": false,
+   "priority": 7.3,
+   "rank": 66
+  },
+  {
+   "id": "itr-business-deadline",
+   "title": "ITR Deadline for Business and Professionals",
+   "problem": "What are the ITR filing deadlines and mistakes for business owners?",
+   "audience": [
+    "founder"
+   ],
+   "why_it_matters": "Late filing means penalty and lost loss carry-forward.",
+   "evidence": {
+    "sources": [
+     "news",
+     "autocomplete"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "Income tax dept nudges non-audit taxpayers to file ITR before Aug 31",
+     "August 31 ITR deadline: Mistakes professionals should avoid",
+     "income tax return penalty",
+     "Late ITR Filing Penalty AY 2026-27"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "hidden cost",
+    "founder mistake story"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": false,
+   "priority": 7.3,
+   "rank": 67
+  },
+  {
+   "id": "vendor-statement-reconciliation",
+   "title": "Vendor Ledger Reconciliation at Year End",
+   "problem": "How do you reconcile a vendor's statement with your payables ledger?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Unmatched balances mean wrong payables and disputes.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "At year-end, vendors come with their statements - can we reconcile with ours?",
+     "Can we upload a snapshot of the vendor's books?",
+     "Many vendors don't pass payment entries"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "founder mistake story"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 7.2,
+   "rank": 68
+  },
+  {
+   "id": "vendor-master-creation",
+   "title": "New Vendor in Tally: Master Creation Slows Entry",
+   "problem": "How do you avoid manual vendor and ledger creation before every new bill?",
+   "audience": [
+    "accountant",
+    "finance_head"
+   ],
+   "why_it_matters": "Extra steps slow every entry.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "Manual master/vendor creation in Tally",
+     "Vendor master creation adds steps before entry point",
+     "If a vendor is not in Tally, can we create it?",
+     "Manual item/ledger creation for vendors during data entry"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "explained in 60 seconds",
+    "myth vs reality"
+   ],
+   "aia_fit": "direct",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": false,
+   "priority": 6.9,
+   "rank": 69
+  },
+  {
+   "id": "purchase-vs-sale-price-check",
+   "title": "Catching Purchase Price Above Sale Price",
+   "problem": "How do you spot bills where cost exceeds selling price or prices drift by vendor?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Silent margin leaks.",
+   "evidence": {
+    "sources": [
+     "sales_calls"
+    ],
+    "signal_score": 3,
+    "examples": [
+     "Can the system flag purchase price higher than sale price?",
+     "raw material purchase price trend across vendors",
+     "Audit purchase bills against quotations"
+    ]
+   },
+   "suggested_angles": [
+    "hidden cost",
+    "smart founders vs others",
+    "founder mistake story"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english",
+    "hinglish"
+   ],
+   "related_blog": null,
+   "evergreen": true,
+   "priority": 6.7,
+   "rank": 70
+  },
+  {
+   "id": "tally-prime-shortcuts",
+   "title": "TallyPrime Shortcuts That Save Hours",
+   "problem": "Which keyboard shortcuts speed up voucher entry?",
+   "audience": [
+    "accountant"
+   ],
+   "why_it_matters": "Faster entry cuts daily data-entry time.",
+   "evidence": {
+    "sources": [
+     "autocomplete",
+     "blog"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "tally entry copy shortcut key",
+     "tally prime voucher entry ka shortcut kya hai",
+     "debit note credit note shortcut key"
+    ]
+   },
+   "suggested_angles": [
+    "explained in 60 seconds",
+    "smart founders vs others",
+    "myth vs reality"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "hinglish",
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/all-tally-prime-shortcut-keys-list",
+   "evergreen": true,
+   "priority": 6.7,
+   "rank": 71
+  },
+  {
+   "id": "tcs-on-sale",
+   "title": "TCS on Sale of Goods: Who Collects It",
+   "problem": "When must a seller collect TCS and how is it accounted?",
+   "audience": [
+    "finance_head",
+    "accountant",
+    "founder"
+   ],
+   "why_it_matters": "Missed TCS brings interest and penalty.",
+   "evidence": {
+    "sources": [
+     "blog",
+     "competitor"
+    ],
+    "signal_score": 3,
+    "examples": [
+     "TCS on sale of goods",
+     "TDS section 194q TCS 206c guide",
+     "Difference between TDS TCS"
+    ]
+   },
+   "suggested_angles": [
+    "why behind the rule",
+    "explained in 60 seconds",
+    "what happens if you ignore it"
+   ],
+   "aia_fit": "none",
+   "language_fit": [
+    "english"
+   ],
+   "related_blog": "https://www.aiaccountant.com/blog/tcs-on-sale-of-goods",
+   "evergreen": true,
+   "priority": 6.6,
+   "rank": 72
+  },
+  {
+   "id": "gst-audit-news",
+   "title": "GST Departments Using Data to Flag Mismatches",
+   "problem": "How are GST officers using portal and Udyam data, and what should you expect?",
+   "audience": [
+    "founder",
+    "finance_head"
+   ],
+   "why_it_matters": "Data-driven scrutiny catches mismatched filings.",
+   "evidence": {
+    "sources": [
+     "news"
+    ],
+    "signal_score": 4,
+    "examples": [
+     "Gujarat GST department uses Udyam data, flags even exempt businesses",
+     "Unified GST audit authority for multi-state companies",
+     "Andhra Pradesh AI tax administration model",
+     "Excess ITC Availment demand"
+    ]
+   },
+   "suggested_angles": [
+    "what happens if you ignore it",
+    "smart founders vs others",
+    "explained in 60 seconds"
+   ],
+   "aia_fit": "indirect",
+   "language_fit": [
+    "english"
+   ],
+   "related_blog": null,
+   "evergreen": false,
+   "priority": 6.4,
+   "rank": 73
+  }
+ ]
+}

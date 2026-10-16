@@ -33,7 +33,7 @@ const LANG = {
 - Twist phrases: "But here's the twist...", "Now here's the funny part...".
 - cta beat text exactly: "Full breakdown on AI Accountant dot com."
 - Everything in Latin script, digits ASCII.`,
-    words: [120, 145],
+    words: [110, 130],
     beatWords: "4-14",
   },
 };
@@ -93,7 +93,7 @@ Return ONLY JSON:
 {"length":"short|long","length_reason":"only if long",
  "title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
  "beats":[{"role":"hook|setup|story|twist|takeaway|cta","kind":"fact|example","text":"spoken words","visual":{...},"keywords":["..."]}],
- "caption":"Instagram/LinkedIn description, 2-3 short lines, ends with 'Read the full guide: <BLOG_URL>'",
+ "caption":"Instagram/LinkedIn description, 2-3 short lines, ends with 'Read the full guide: ' + the BLOG_URL given below",
  "hashtags":["#GST","..."] (6-10, mix broad and niche, Indian business context)}`;
 
 const norm = (s) => s.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ");
@@ -139,8 +139,6 @@ export async function writeScript(blog, angle, { feedback = "", targetWords, res
   const user = `ANGLE: ${angleText}
 BLOG MAIN TOPIC: ${blog.title}
 SEARCH KEYWORD: ${research?.keyword || blog.title}
-AiA CONTEXT (product, proof points, competitors; only source for claims about AI Accountant and competitors):
-${PRODUCT}
 RESEARCH NOTES (verified, newer than the blog; you may use these facts):
 ${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
 ${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? (previous ? `YOUR PREVIOUS DRAFT (below) WAS REJECTED. Make the SMALLEST possible edit: rewrite or remove only the flagged lines and keep the rest of the story (if the problem is length, cut or merge beats until it fits; that is the only case where you may change other beats). Never replace a flagged claim with a new unsupported claim.\nProblems:\n${feedback}\nPREVIOUS DRAFT JSON:\n${JSON.stringify(previous)}\n` : `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n`) : ""}
@@ -150,7 +148,7 @@ BLOG POST:
 """
 ${blog.text}
 """`;
-  const { json, cost } = await chatJSON({ model: config.scriptModel, system: system().replace("<BLOG_URL>", blog.url), user });
+  const { json, cost } = await chatJSON({ model: config.scriptModel, system: `${system()}\n\nAiA CONTEXT (product, proof points, competitors; only source for claims about AI Accountant and competitors):\n${PRODUCT}`, user: user.replace("<BLOG_URL>", blog.url) });
   return { script: json, cost };
 }
 

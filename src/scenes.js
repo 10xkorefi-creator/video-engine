@@ -20,9 +20,14 @@ export const isProductScene = (k) => PRODUCT.has(k);
 const list = (a, n, dflt) => (Array.isArray(a) && a.length ? a : dflt).slice(0, n).map((x) => esc(String(x)));
 const AMOUNTS = ["₹12,400", "₹8,750", "₹46,200", "₹3,180", "₹21,900"]; // decorative UI values, never narrated
 
-const logoHead = (label) => `<div class="ui-head"><img src="assets/ai-accountant-a-star.svg" alt=""><span class="ui-brand">AI Accountant</span><span class="ui-tab">${esc(label)}</span></div>`;
+let branded = true;
+const logoHead = (label) => branded
+  ? `<div class="ui-head"><img src="assets/ai-accountant-a-star.svg" alt=""><span class="ui-brand">AI Accountant</span><span class="ui-tab">${esc(label)}</span></div>`
+  : `<div class="ui-head"><span class="ui-brand">${esc(label)}</span></div>`;
 
-export function sceneHtml(v) {
+/** brand=false renders product scenes as a neutral screen (beat doesn't mention AI Accountant). */
+export function sceneHtml(v, { brand = true } = {}) {
+  branded = brand;
   const p = v.params || {};
   const k = v.scene;
   if (k === "bills_flow") {
@@ -57,7 +62,7 @@ export function sceneHtml(v) {
   }
   if (k === "whatsapp") {
     return `<div class="sc sc-dark" data-scene="whatsapp">
-      <div class="phone"><div class="ph-top"><img src="assets/ai-accountant-a-star-white.svg" alt=""><span>AI Accountant</span></div>
+      <div class="phone"><div class="ph-top">${branded ? `<img src="assets/ai-accountant-a-star-white.svg" alt=""><span>AI Accountant</span>` : `<span>Chat</span>`}</div>
         <div class="bubble me">${esc(p.question || "Aaj kitna cash hai?")}</div>
         <div class="typing"><i></i><i></i><i></i></div>
         <div class="bubble bot">${esc(p.answer || "Bank balance, dues and payables, all here 👇")}</div>
