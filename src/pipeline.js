@@ -21,17 +21,19 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
   let feedback = opts.feedback || "";
   let lastIssues = [];
   let previous = opts.previous || null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 4; attempt++) {
     const { script, cost } = await writeScript(blog, angle, { feedback, targetWords: opts.targetWords, research: opts.research, previous });
     previous = script;
     costs.add("script_llm", cost);
     const { errs, words } = validateShape(script);
     const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []) + "\n" + PRODUCT);
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
-    if (errs.length) { feedback = errs.join("\n"); lastIssues = errs; continue; }
+    // Word count is only a proxy: if length is the last problem left, let the measured voice decide (TTS loop trims).
+    const hard = errs.filter((e) => !e.startsWith("Too long"));
+    if (hard.length || (errs.length && attempt < 3)) { feedback = errs.join("\n"); lastIssues = errs; continue; }
     const [fc, pc] = await Promise.all([factCheck(blog, script, opts.research?.notes || []), plainCheck(script)]);
     costs.add("fact_check_llm", fc.cost + pc.cost);
-    if (fc.ok && (pc.ok || attempt === 2)) return { script, words, plainIssues: pc.issues };
+    if (fc.ok && (pc.ok || attempt >= 2)) return { script, words, plainIssues: pc.issues };
     if (!fc.ok) {
     feedback = `Unsupported claims found by the fact checker:\n- ${fc.issues.join("\n- ")}`;
     lastIssues = fc.issues;
@@ -39,11 +41,11 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
       feedback = `Too technical for a founder with zero accounting knowledge. Rewrite these lines in plain everyday words (keep the story):\n- ${pc.issues.join("\n- ")}`;
     }
   }
-  throw new StepError("fact_check", new Error(`script failed checks after 3 drafts: ${lastIssues.join(" | ").slice(0, 600)}`));
+  throw new StepError("fact_check", new Error(`script failed checks after 4 drafts: ${lastIssues.join(" | ").slice(0, 600)}`));
 }
 
 /** A topic from the topic bank becomes the "blog" (direction): its related blog if any, else a research brief. */
-async function sourceFor(topic, blogUrl) {
+export async function sourceFor(topic, blogUrl) {
   if (!topic) return fetchBlog(blogUrl);
   const brief = [
     `TOPIC: ${topic.title}`, `PROBLEM: ${topic.problem || ""}`, `WHY IT MATTERS: ${topic.why_it_matters || ""}`,

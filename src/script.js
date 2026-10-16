@@ -32,7 +32,8 @@ const LANG = {
 - You may add ElevenLabs v3 delivery tags in square brackets: [confident], [playful], [excited], [curious], [whispers], [pause], [laughs softly]. Max 1 tag per beat, about 6 in total. Tags are not spoken.
 - Twist phrases: "But here's the twist...", "Now here's the funny part...".
 - cta beat text exactly: "Full breakdown on AI Accountant dot com."
-- Everything in Latin script, digits ASCII.`,
+- Everything in Latin script, digits ASCII.
+- ENGLISH ONLY: every spoken word is English (Indian terms like lakh, crore, CA are fine). The Hindi phrases in the rules below only illustrate tone; write their English equivalent ("Let's say...", "Most founders get this wrong"). No Hindi words, no Devanagari.`,
     words: [110, 130],
     beatWords: "4-14",
   },
@@ -129,6 +130,7 @@ export function validateShape(s) {
   if (beats[0] && countWords(beats[0].text) > 8) errs.push("hook longer than 7 words");
   for (const b of beats) if (!b.visual?.type) errs.push(`beat without visual: ${b.text}`);
   const onScreen = [s.title, s.caption, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
+  if (currentLanguage === "english" && beats.some((b) => /[ऀ-ॿ]/.test(b.text))) errs.push("This is an ENGLISH reel: rewrite every beat in English only, no Hindi or Devanagari.");
   if (/[ऀ-ॿ]/.test(onScreen)) errs.push("on-screen text, title and caption must use Latin script only");
   return { errs, words };
 }
