@@ -11,8 +11,10 @@ services:
     volumes:
       - reel-data:/data
     # Rendering is CPU-heavy; keep headroom for n8n.
-    cpus: ${REEL_CPUS:-3}
-    mem_limit: 4g
+    cpus: ${REEL_CPUS:-4}
+    mem_limit: ${REEL_MEM:-8g}
+    environment:
+      RENDER_WORKERS: ${RENDER_WORKERS:-4}
     shm_size: 1gb
     networks: [n8n]
 

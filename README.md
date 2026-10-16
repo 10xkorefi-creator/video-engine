@@ -50,23 +50,22 @@ Output goes to `out/<date>-<slug>-<angle>/`. It contains the MP4, `report.json` 
 
 ## Deploy next to n8n (Docker)
 
-1. Supabase (once): run `sql/reel_jobs.sql` and create a **public** bucket `reels` (mp4 only). Both already exist in the *AI Accountant* project.
-2. On the server:
+1. Supabase (once): run `sql/reel_jobs.sql` and create a **public** bucket `reels`. Both already exist in the *AI Accountant* project.
+2. On the n8n server:
    ```bash
-   git clone <repo> reel-engine && cd reel-engine
-   cp .env.example .env && nano .env          # keys + a long random SERVICE_TOKEN
-   docker network ls                          # find n8n's network, e.g. n8n_default
-   N8N_NETWORK=n8n_default docker compose up -d --build
-   docker exec reel-engine curl -s localhost:8080/health
+   git clone <repo> /opt/reel-engine && cd /opt/reel-engine
+   bash scripts/deploy.sh      # first run creates .env and stops
+   nano .env                   # OPENROUTER_API_KEY, PIXABAY_API_KEY, SUPABASE_SERVICE_KEY
+   bash scripts/deploy.sh      # generates SERVICE_TOKEN, joins n8n's network, builds, health-checks
    ```
-3. n8n: open the workflow **Blog → Shorts Reels (daily)**, which is already in your n8n and **inactive**. You can also import `n8n/workflow.json`. Then:
-   - **Make Reel A / B**: create an *HTTP Bearer Auth* credential "Reel Engine Token" with `SERVICE_TOKEN`. The URL `http://reel-engine:8080/reels` works when both containers share a network.
+   Updating later is the same: `bash scripts/deploy.sh` pulls and rebuilds.
+3. n8n: open **Topics → Shorts Reels (3/day: 2 EN + 1 HI)** (inactive). Then:
+   - **Get Today's Plan / Make Reel**: create an *HTTP Bearer Auth* credential "Reel Engine Token" with the `SERVICE_TOKEN` the script printed. `http://reel-engine:8080` works because both containers share a network.
    - **Send to Teams**: pick your Microsoft Graph OAuth2 credential and replace `REPLACE_WITH_TEAMS_CHAT_ID` in the URL.
-   - **Get Used Blogs / Update Reel Status**: check that the Supabase credential points at the AI Accountant project.
-   - **Pick Next Blog**: holds the ranked blog list (Search Console clicks). Edit it freely.
+   - **Update Reel Status**: check that the Supabase credential points at the AI Accountant project.
    - Activate the workflow. It runs daily at 09:00 IST.
 
-Sizing: about 3 minutes of render per reel on 4 vCPU, so a 2-vCPU box needs about 6–7 minutes. Keep the n8n HTTP timeout at 25 minutes or more (already set).
+Sizing: about 3 minutes of render per reel with `REEL_CPUS=4` (default; a KVM 8 box has headroom for 6). Keep the n8n HTTP timeout at 25 minutes or more (already set).
 
 ## Cost per reel (measured)
 
