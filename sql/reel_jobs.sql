@@ -2,7 +2,9 @@
 -- "Which blogs are used" = select distinct blog_url from reel_jobs.
 create table if not exists public.reel_jobs (
   id             bigint generated always as identity primary key,
-  blog_url       text        not null,
+  blog_url       text        not null,                 -- source key: blog URL or topic:<id>
+  topic          text,                                 -- topic title when from the topic bank
+  language       text        not null default 'hinglish', -- english | hinglish
   angle          text        not null,                 -- 'A', 'B' or 'custom-...'
   status         text        not null default 'queued'
                  check (status in ('queued', 'rendering', 'ready', 'approved', 'rejected', 'failed', 'published')),
@@ -19,7 +21,7 @@ create table if not exists public.reel_jobs (
   reviewed_by    text,
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now(),
-  unique (blog_url, angle)
+  unique (blog_url, angle, language)
 );
 
 -- Only the service role (reel-engine, n8n) touches this table.

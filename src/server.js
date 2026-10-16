@@ -34,7 +34,7 @@ const server = http.createServer(async (req, res) => {
 
       log(`request: ${body.blog_url} angle=${body.angle || "A"} (queue ${queued})`);
       const result = await enqueue(() =>
-        makeReel({ blogUrl: body.blog_url, angle: body.angle || "A", voice: body.voice, upload: body.upload !== false }));
+        makeReel({ blogUrl: body.blog_url, angle: body.angle || "A", voice: body.voice, language: body.language, upload: body.upload !== false }));
       return send(res, result.ok ? 200 : 500, result);
     }
     send(res, 404, { ok: false, error: "not found" });

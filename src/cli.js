@@ -8,6 +8,7 @@ const { values } = parseArgs({
     blog: { type: "string" },
     angle: { type: "string", default: "A" },
     voice: { type: "string" },
+    language: { type: "string" },
     "no-upload": { type: "boolean", default: false },
     out: { type: "string" },
   },
@@ -22,6 +23,7 @@ const result = await makeReel({
   blogUrl: values.blog,
   angle: values.angle,
   voice: values.voice,
+  language: values.language,
   upload: !values["no-upload"],
   outDir: values.out,
 });

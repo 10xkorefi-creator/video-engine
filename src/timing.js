@@ -61,6 +61,12 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
   beatWin.forEach((b, bi) => {
     const len = b.end - b.start;
     const isFootage = b.visual?.type === "footage";
+    // Same scene on consecutive beats = one continuous animation.
+    const prev = shots[shots.length - 1];
+    if (b.visual?.type === "scene" && prev?.visual?.type === "scene" && JSON.stringify(prev.visual) === JSON.stringify(b.visual)) {
+      prev.end = b.end;
+      return;
+    }
     const n = isFootage ? Math.max(1, Math.ceil(len / 3.6)) : 1;
     for (let k = 0; k < n; k++) {
       shots.push({

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { ROOT } from "./config.js";
 import { chatJSON } from "./openrouter.js";
+import { SCENE_KINDS } from "./scenes.js";
 
 export const PRODUCT = readFileSync(path.join(ROOT, "config", "product.md"), "utf8");
 
@@ -27,14 +28,21 @@ const LANG = {
     beatWords: "3-12",
   },
   english: {
-    voice: `LANGUAGE AND VOICE: Punchy spoken Indian English. Tone: assertive and light, confident, a little cheeky, never preachy.
-- cta beat text exactly: "Full breakdown on AI Accountant dot com."`,
+    voice: `LANGUAGE AND VOICE: Natural spoken Indian English, like a sharp founder explaining to a friend. Indian terms are fine (lakh, crore, CA, GST). Tone: assertive and light, confident, a little cheeky, never preachy.
+- You may add ElevenLabs v3 delivery tags in square brackets: [confident], [playful], [excited], [curious], [whispers], [pause], [laughs softly]. Max 1 tag per beat, about 6 in total. Tags are not spoken.
+- Twist phrases: "But here's the twist...", "Now here's the funny part...".
+- cta beat text exactly: "Full breakdown on AI Accountant dot com."
+- Everything in Latin script, digits ASCII.`,
     words: [120, 145],
     beatWords: "4-14",
   },
 };
 
-const lang = () => LANG[config.language] || LANG.hinglish;
+let currentLanguage = config.language;
+/** "hindi" maps to the approved Hinglish style (Hindi words in Devanagari, English terms in Latin). */
+export const normalizeLanguage = (l) => (/^en/i.test(l || "") ? "english" : /^(hi|hindi|hinglish)/i.test(l || "") ? "hinglish" : (LANG[config.language] ? config.language : "hinglish"));
+export function setLanguage(l) { currentLanguage = normalizeLanguage(l); return currentLanguage; }
+const lang = () => LANG[currentLanguage] || LANG.hinglish;
 
 const system = () => `You write viral 45-55 second faceless Shorts for AI Accountant (aiaccountant.com): relatable, story-first, Thinketh-style hooks and pacing.
 Audience: founders and business owners of Indian SMBs (Rs 1-100 crore turnover). They are busy, smart, and NOT accountants. They care about cash, time, stress, growth and not getting a notice. Write for a 25-year-old founder with zero accounting knowledge.
@@ -70,11 +78,14 @@ FACTS (strict)
 - Competitors and alternatives (Tally's Docs by Ira, Suvit, Zoho Books, Excel imports, generic OCR) may be named only when the story is about choosing a tool, using ONLY the facts in CONTEXT section 6, fairly and without mockery, with the contrast naturally favouring AiA. Never make specific claims about VouchrIt.
 - Proof points (75%, 95% bills accuracy, 50+ banks, survey stats, 21-branch hotel) only exactly as written in CONTEXT section 4, and only when they serve the story.
 
-VISUAL per beat (one of):
-- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday, never ambiguous words (say 'invoice paper' not 'bill', 'office desk' not 'desk') (e.g. 'indian shop owner', 'worried businessman phone', 'chai office', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
+VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, offices, stress), animated scenes for EXPLAINING, stat cards for NUMBERS.
+- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday, never ambiguous words (say 'invoice paper' not 'bill') (e.g. 'indian shop owner', 'worried businessman phone', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
 - {"type":"stat","value":"the exact figure as it appears in this beat's text","label":"2-5 word plain-English label"}
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
-Use 3-5 cards (stat/text) total, the rest footage. Never two cards in a row. The cta beat uses {"type":"text","value":"aiaccountant.com"}.
+- {"type":"scene","scene":"<kind>","params":{...}} animated explainer/product scene. Kinds:
+${Object.entries(SCENE_KINDS).map(([k, d]) => `  * ${k}: ${d}`).join("\n")}
+  Product scenes (bills_flow, bank_match, gst_match, whatsapp) ONLY on the beat(s) where AI Accountant is mentioned. Explainer scenes (deadline, meter, split, flow) whenever a process, deadline, ticking cost or comparison is being explained. Scene params are short on-screen labels in Latin script; any figure in params must appear in that beat's text.
+Use 4-7 non-footage visuals (stat/text/scene) total, at least 2 of them scenes when the story explains something. Never two text cards in a row. A scene may stay on screen for up to 2 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
 
 Also return "keywords" per beat: 0-3 words copied exactly from that beat's text to highlight in captions (numbers, the key noun).
 
@@ -96,7 +107,7 @@ export function unsupportedNumbers(script, blogText) {
   const nums = new Set();
   for (const b of script.beats) {
     if (b.kind === "example") continue; // clearly-framed hypothetical amounts
-    for (const src of [stripTags(b.text), b.visual?.value || ""]) {
+    for (const src of [stripTags(b.text), b.visual?.value || "", ...Object.values(b.visual?.params || {}).flat().map(String)]) {
       for (const m of norm(src).matchAll(/\d+(?:\.\d+)?/g)) nums.add(m[0]);
     }
   }

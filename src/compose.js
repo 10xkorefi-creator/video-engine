@@ -2,6 +2,7 @@ import { cp, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ROOT } from "./config.js";
 import { escapeHtml as esc } from "./util.js";
+import { sceneHtml, SCENE_CSS, SCENE_JS, isProductScene } from "./scenes.js";
 
 const W = 1080;
 const H = 1920;
@@ -27,6 +28,9 @@ function shotHtml(s, i) {
   }
   if (type === "footage" && s.asset.kind === "image") {
     return `<div ${common}><div class="kb"><img src="${s.asset.file}" alt=""></div><div class="shade"></div></div>`;
+  }
+  if (type === "scene") {
+    return `<div ${common}>${sceneHtml(v)}</div>`;
   }
   if (s.role === "cta") {
     return `<div ${common}><div class="card cta"><img class="logo" src="assets/ai-accountant-a-star-white.svg" alt=""><div class="cta-kicker">Full breakdown</div><div class="cta-url">aiaccountant.com</div><div class="cta-sub">Free guide on the blog</div></div></div>`;
@@ -66,7 +70,8 @@ function audioHtml(tl, { bed }) {
 
 function timelineJs(tl) {
   const shots = tl.shots.map((s, i) => ({
-    id: `shot${i}`, start: s.start, end: s.end, type: s.visual?.type, kind: s.asset?.kind, role: s.role,
+    id: `shot${i}`, start: s.start, end: s.end, type: s.visual?.type, kind: s.asset?.kind, role: s.role, scene: s.visual?.scene,
+    brand: s.visual?.type !== "footage" && !(s.visual?.type === "scene" && isProductScene(s.visual?.scene)) && s.role !== "cta",
     tr: i === 0 ? "none" : TRANSITIONS[i % TRANSITIONS.length],
   }));
   const caps = tl.captions.map((c, i) => ({ id: `cap${i}`, words: c.words.map((w, j) => ({ id: `c${i}w${j}`, s: w.start, e: w.end })) }));
@@ -74,9 +79,21 @@ function timelineJs(tl) {
       const DATA = ${JSON.stringify({ shots, caps, total: tl.total, twistAt: tl.twistAt })};
       const tl = gsap.timeline({ paused: true });
       const fmtIN = (n) => Math.round(n).toLocaleString("en-IN");
+      // Animated count-up for a single figure (ranges like "10 to 15" stay static).
+      function countUp(tl, v, t, d) {
+        if (!v) return;
+        const m = (v.dataset.count || "").match(/^(\\D*?)([\\d,]+(?:\\.\\d+)?)(\\D*)$/);
+        if (!m) return;
+        const target = parseFloat(m[2].replace(/,/g, ""));
+        const dec = (m[2].split(".")[1] || "").length;
+        const o = { n: 0 };
+        tl.to(o, { n: target, duration: d, ease: "power2.out",
+          onUpdate: () => { v.textContent = m[1] + (dec ? o.n.toFixed(dec) : (m[2].includes(",") ? fmtIN(o.n) : Math.round(o.n))) + m[3]; } }, t);
+        tl.set(v, { textContent: v.dataset.count }, t + d + 0.06);
+      }
+${SCENE_JS}
 
       tl.fromTo("#progress", { scaleX: 0 }, { scaleX: 1, duration: DATA.total, ease: "none" }, 0);
-      tl.fromTo("#brand", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.2);
 
       DATA.shots.forEach((s, i) => {
         const el = "#" + s.id;
@@ -87,7 +104,12 @@ function timelineJs(tl) {
         else if (s.tr === "punch") tl.fromTo(el, { scale: 1.35, opacity: 0.2 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power3.out" }, s.start);
         else if (s.tr === "flash") tl.fromTo("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.25, ease: "power1.out", immediateRender: false }, s.start);
         // motion on every scene
-        if (s.type === "footage") {
+        // brand mark only on clean cards/explainer scenes, never over footage or product UI
+        tl.set("#brand", { autoAlpha: s.brand ? 1 : 0 }, s.start);
+        if (s.type === "scene") {
+          tl.fromTo(el + " .sc", { scale: 1.0 }, { scale: 1.03, duration: dur, ease: "none" }, s.start);
+          if (SCENES[s.scene]) SCENES[s.scene](tl, document.querySelector(el), s.start, dur);
+        } else if (s.type === "footage") {
           const z = i % 2 ? [1.16, 1.04] : [1.04, 1.16];
           tl.fromTo(el + " .kb", { scale: z[0], xPercent: i % 3 === 0 ? -2 : 2 }, { scale: z[1], xPercent: i % 3 === 0 ? 2 : -2, duration: dur, ease: "none" }, s.start);
         } else {
@@ -95,15 +117,7 @@ function timelineJs(tl) {
           tl.from(el + " .card > *:not(.glow)", { y: 80, opacity: 0, duration: 0.45, stagger: 0.08, ease: "back.out(1.6)" }, s.start + 0.05);
           const v = document.querySelector(el + " .stat-val");
           if (v) {
-            const m = (v.dataset.count || "").match(/^(\\D*?)([\\d,]+(?:\\.\\d+)?)(\\D*)$/); // single numbers only, not ranges
-            if (m) {
-              const target = parseFloat(m[2].replace(/,/g, ""));
-              const dec = (m[2].split(".")[1] || "").length;
-              const o = { n: 0 };
-              tl.to(o, { n: target, duration: Math.min(0.9, dur * 0.5), ease: "power2.out",
-                onUpdate: () => { v.textContent = m[1] + (dec ? o.n.toFixed(dec) : (m[2].includes(",") ? fmtIN(o.n) : Math.round(o.n))) + m[3]; } }, s.start + 0.05);
-              tl.set(v, { textContent: v.dataset.count }, s.start + Math.min(0.9, dur * 0.5) + 0.06);
-            }
+            countUp(tl, v, s.start + 0.05, Math.min(0.9, dur * 0.5));
             tl.fromTo(el + " .glow", { scale: 0.6, opacity: 0 }, { scale: 1.2, opacity: 1, duration: 0.8, ease: "power2.out" }, s.start);
           }
         }
@@ -137,7 +151,7 @@ const CSS = `
       #stage { position: absolute; inset: 0; }
       .clip { position: absolute; inset: 0; }
       .shot { overflow: hidden; background: #000; }
-      .kb { position: absolute; inset: 0; will-change: transform; }
+      .kb { position: absolute; inset: 0; will-change: transform; }${SCENE_CSS}
       .kb video, .kb img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .shade { position: absolute; inset: 0; background:
         linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 45%, rgba(0,0,0,.65) 75%, rgba(0,0,0,.8) 100%); }

@@ -3,7 +3,7 @@ import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
 import { research as doResearch, sourcesText } from "./research.js";
-import { PRODUCT, stripTags, writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
+import { PRODUCT, stripTags, setLanguage, writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
@@ -42,16 +42,17 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
   throw new StepError("fact_check", new Error(`script failed checks after 3 drafts: ${lastIssues.join(" | ").slice(0, 600)}`));
 }
 
-export async function makeReel({ blogUrl, angle = "A", upload = true, voice, outDir }) {
+export async function makeReel({ blogUrl, angle = "A", upload = true, voice, outDir, language }) {
   const t0 = Date.now();
+  const lang = setLanguage(language);
   const costs = new Costs();
   const angleKey = /^[ABCD]$/i.test(angle) ? angle.toUpperCase() : `custom-${slugify(angle).slice(0, 24)}`;
   const date = new Date().toISOString().slice(0, 10);
-  const jobId = `${date}-${slugify(blogUrl)}-${angleKey}`;
+  const jobId = `${date}-${slugify(blogUrl)}-${angleKey}-${lang === "english" ? "en" : "hi"}`;
   const dir = outDir || path.join(config.workDir, jobId);
   const projectDir = path.join(dir, "project");
   await mkdir(projectDir, { recursive: true });
-  const base = { blog_url: blogUrl, angle: angleKey };
+  const base = { blog_url: blogUrl, angle: angleKey, language: lang };
   if (upload) await saveJob({ ...base, status: "rendering", failed_step: null, error: null });
 
   try {
@@ -114,7 +115,7 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
     const { duration } = await step("verify", () => verify(mp4, script.length === "long" ? config.maxLongSeconds : config.maxSeconds), { retries: 0 });
 
     let videoUrl = null;
-    if (upload) videoUrl = await step("upload", () => uploadVideo(mp4, `${date}/${slugify(blogUrl)}-${angleKey}.mp4`));
+    if (upload) videoUrl = await step("upload", () => uploadVideo(mp4, `${date}/${jobId.slice(11)}.mp4`));
 
     const hashtags = (script.hashtags || []).map((h) => (h.startsWith("#") ? h : `#${h}`));
     const result = {
@@ -123,6 +124,7 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
       blog_url: blogUrl,
       blog_title: blog.title,
       angle: angleKey,
+      language: lang,
       title: script.title,
       script: scriptPlain(script),
       tts_input: scriptText(script),

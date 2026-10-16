@@ -25,7 +25,7 @@ export async function uploadVideo(file, objectPath) {
 /** Upsert the job row keyed on (blog_url, angle). Never throws: tracking must not kill a render. */
 export async function saveJob(row) {
   try {
-    const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?on_conflict=blog_url,angle`;
+    const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?on_conflict=blog_url,angle,language`;
     await http(url, {
       method: "POST",
       headers: headers({ "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" }),
