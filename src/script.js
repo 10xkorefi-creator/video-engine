@@ -94,7 +94,7 @@ Return ONLY JSON:
 {"length":"short|long","length_reason":"only if long",
  "title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
  "beats":[{"role":"hook|setup|story|twist|takeaway|cta","kind":"fact|example","text":"spoken words","visual":{...},"keywords":["..."]}],
- "caption":"Instagram/LinkedIn description, 2-3 short lines, ends with 'Read the full guide: ' + the BLOG_URL given below",
+ "caption":"Post caption, max 3 short lines (under 300 characters). Line 1 is a scroll-stopping hook for readers (max 12 words: a surprising stake, a sharp question or a bold claim the reel backs up; not a copy of the spoken hook, no 'Did you know', no emoji spam). Line 2 is the one-line payoff or takeaway. Line 3: 'Read the full guide: ' + the BLOG_URL given below",
  "hashtags":["#GST","..."] (6-10, mix broad and niche, Indian business context)}`;
 
 const norm = (s) => s.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ");
@@ -129,6 +129,7 @@ export function validateShape(s) {
   if (beats[0]?.role !== "hook") errs.push("first beat must be hook");
   if (beats[0] && countWords(beats[0].text) > 8) errs.push("hook longer than 7 words");
   for (const b of beats) if (!b.visual?.type) errs.push(`beat without visual: ${b.text}`);
+  if (String(s.caption || "").replace(/https?:\/\/\S+/g, "").length > 320) errs.push("caption too long: max 3 short lines, under 300 characters, starting with a hook line");
   const onScreen = [s.title, s.caption, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
   if (currentLanguage === "english" && beats.some((b) => /[ऀ-ॿ]/.test(b.text))) errs.push("This is an ENGLISH reel: rewrite every beat in English only, no Hindi or Devanagari.");
   if (/[ऀ-ॿ]/.test(onScreen)) errs.push("on-screen text, title and caption must use Latin script only");
