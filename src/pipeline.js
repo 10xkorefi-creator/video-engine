@@ -153,6 +153,8 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
       tts_input: scriptText(script),
       beats: script.beats.map((b) => ({ role: b.role, text: b.text, visual: b.visual })),
       caption: `${script.caption}\n\n${hashtags.join(" ")}`,
+      // Posted as the first/pinned comment, never in the caption.
+      first_comment: `Read the full guide: ${blog.url}`,
       hashtags,
       video_url: videoUrl,
       local_file: mp4,

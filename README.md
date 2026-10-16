@@ -24,7 +24,7 @@ blog URL ─► fetch ─► web research (sourced facts + blog-conflict flags) 
 Success (`200`):
 
 ```json
-{ "ok": true, "title": "...", "script": "...", "caption": "... #GST #TDS",
+{ "ok": true, "title": "...", "script": "...", "caption": "Hook line\nTakeaway\n\n#GST #TDS", "first_comment": "Read the full guide: https://...",
   "video_url": "https://<project>.supabase.co/storage/v1/object/public/reels/2026-10-15/tds-filing-due-date-A.mp4",
   "duration_s": 54.4, "hook_first_sentence_s": 0.96, "render_seconds": 169,
   "cost_usd": { "research_llm": 0.047, "script_llm": 0.036, "tts": 0.028, "...": 0, "total": 0.115 },
