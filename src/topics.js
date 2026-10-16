@@ -57,7 +57,7 @@ export const SEEDS = [
   "debit note credit note", "reverse charge gst",
 ];
 export const MODIFIERS = ["", " kaise", " kya hai", " how to", " penalty", " mistake", " why"];
-const NAV_RX = /\b(login|log in|sign ?in|customer care|helpline|contact number|near me|apk|crack|mod|free download|download for pc|jobs?|vacancy|vacancies|recruitment|course fees|salary in|portal link|website|app download|ppt|pdf download|in hindi pdf|class 1[12]|ncert|cbse|mcq|meaning in (tamil|telugu|marathi|bengali|gujarati|kannada|malayalam))\b/i;
+const NAV_RX = /\b(login|log in|sign ?in|customer care|helpline|contact number|near me|apk|crack|mod|free download|download for pc|jobs?|vacancy|vacancies|recruitment|course fees|salary in|portal link|website|kaise bane|career|course|tally (prime )?(kaise )?download|app download|ppt|pdf download|in hindi pdf|class 1[12]|ncert|cbse|mcq|meaning in (tamil|telugu|marathi|bengali|gujarati|kannada|malayalam))\b/i;
 
 async function suggest(q, { yt = false, hl = "en" } = {}) {
   const u = `https://suggestqueries.google.com/complete/search?client=firefox&hl=${hl}&gl=in${yt ? "&ds=yt" : ""}&q=${encodeURIComponent(q)}`;

@@ -42,9 +42,26 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
   throw new StepError("fact_check", new Error(`script failed checks after 3 drafts: ${lastIssues.join(" | ").slice(0, 600)}`));
 }
 
-export async function makeReel({ blogUrl, angle = "A", upload = true, voice, outDir, language }) {
+/** A topic from the topic bank becomes the "blog" (direction): its related blog if any, else a research brief. */
+async function sourceFor(topic, blogUrl) {
+  if (!topic) return fetchBlog(blogUrl);
+  const brief = [
+    `TOPIC: ${topic.title}`, `PROBLEM: ${topic.problem || ""}`, `WHY IT MATTERS: ${topic.why_it_matters || ""}`,
+    `WHAT PEOPLE ACTUALLY ASK: ${(topic.evidence?.examples || []).join(" | ")}`,
+  ].join("\n");
+  if (topic.related_blog) {
+    try {
+      const b = await fetchBlog(topic.related_blog);
+      return { ...b, title: topic.title, text: `${brief}\n\nRELATED AI ACCOUNTANT BLOG (${b.title}):\n${b.text}` };
+    } catch {}
+  }
+  return { url: topic.related_blog || "https://www.aiaccountant.com", title: topic.title, text: brief };
+}
+
+export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voice, outDir, language }) {
   const t0 = Date.now();
   const lang = setLanguage(language);
+  if (topic) blogUrl = `topic:${topic.id}`;
   const costs = new Costs();
   const angleKey = /^[ABCD]$/i.test(angle) ? angle.toUpperCase() : `custom-${slugify(angle).slice(0, 24)}`;
   const date = new Date().toISOString().slice(0, 10);
@@ -52,16 +69,16 @@ export async function makeReel({ blogUrl, angle = "A", upload = true, voice, out
   const dir = outDir || path.join(config.workDir, jobId);
   const projectDir = path.join(dir, "project");
   await mkdir(projectDir, { recursive: true });
-  const base = { blog_url: blogUrl, angle: angleKey, language: lang };
+  const base = { blog_url: blogUrl, angle: angleKey, language: lang, topic: topic?.title || null };
   if (upload) await saveJob({ ...base, status: "rendering", failed_step: null, error: null });
 
   try {
-    const blog = await step("fetch_blog", () => fetchBlog(blogUrl));
+    const blog = await step("fetch_blog", () => sourceFor(topic, blogUrl));
 
     // Research is best-effort: if web search fails we still write from the blog alone.
     let research = { keyword: blog.title, notes: [], conflicts: [] };
     try {
-      const cacheFile = path.join(config.cacheDir, "research", `${date}-${slugify(blogUrl)}.json`);
+      const cacheFile = path.join(config.cacheDir, "research", `${date}-${slugify(blogUrl.replace(/^topic:/, "topic-"))}.json`);
       research = await readFile(cacheFile, "utf8").then(JSON.parse).catch(() => null);
       if (!research && config.researchResults > 0) {
         research = await step("research", () => doResearch(blog));

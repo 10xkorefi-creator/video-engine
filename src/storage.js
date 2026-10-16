@@ -35,3 +35,10 @@ export async function saveJob(row) {
     log(`  (job row not saved: ${e.message})`);
   }
 }
+
+/** Source keys (blog URLs and topic:<id>) already used in reel_jobs. */
+export async function usedSources() {
+  const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?select=blog_url&limit=10000`;
+  const rows = await (await http(url, { headers: headers() }, 30_000)).json();
+  return new Set(rows.map((r) => r.blog_url));
+}
