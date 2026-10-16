@@ -36,6 +36,9 @@ export const config = {
   language: env("LANGUAGE", "hinglish"), // hinglish | english
   ttsModel: env("TTS_MODEL", "elevenlabs/eleven-v3"),
   ttsVoice: env("TTS_VOICE", "4yF24b9emqK8f4DBqL2Q"),
+  // English reels can use their own voice; empty falls back to TTS_MODEL / TTS_VOICE.
+  ttsModelEn: env("TTS_MODEL_EN", ""),
+  ttsVoiceEn: env("TTS_VOICE_EN", ""),
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
 
   minSeconds: Number(env("MIN_SECONDS", 40)),

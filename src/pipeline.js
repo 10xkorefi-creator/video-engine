@@ -99,7 +99,10 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
     let audioDur;
     for (let pass = 0; pass < 3; pass++) {
       const text = scriptText(script);
-      const { audio, cost } = await step("tts", () => speak(text, { voice }));
+      const en = lang === "english";
+      const ttsModel = (en && config.ttsModelEn) || config.ttsModel;
+      const ttsVoice = voice || (en && config.ttsVoiceEn) || config.ttsVoice;
+      const { audio, cost } = await step("tts", () => speak(text, { model: ttsModel, voice: ttsVoice }));
       costs.add("tts", cost);
       await writeFile(voicePath, audio);
       audioDur = await probeDuration(voicePath);

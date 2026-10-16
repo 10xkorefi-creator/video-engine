@@ -90,5 +90,5 @@ Sizing: about 3 minutes of render per reel on 4 vCPU, so a 2-vCPU box needs abou
 
 See `.env.example`. Useful switches:
 - `LANGUAGE=english`
-- `TTS_VOICE=<voice-library id>`
+- `TTS_VOICE=<voice-library id>` (Hinglish); `TTS_VOICE_EN` / `TTS_MODEL_EN` override it for English reels
 - `RESEARCH_RESULTS=0` turns web research off, so scripts come from the blog only.
