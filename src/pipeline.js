@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.js";
 import { fetchBlog } from "./blog.js";
@@ -10,7 +10,7 @@ import { resolveVisuals } from "./visuals.js";
 import { writeProject } from "./compose.js";
 import { render, verify } from "./render.js";
 import { uploadVideo, saveJob } from "./storage.js";
-import { Costs, StepError, log, probeDuration, slugify, step } from "./util.js";
+import { Costs, StepError, log, probeDuration, run, slugify, step } from "./util.js";
 
 const LEAD = 0.1;
 const TAIL = 0.9;
@@ -112,6 +112,16 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
       log(`  voice ${audioDur.toFixed(1)}s -> reel ${total.toFixed(1)}s`);
       const maxS = script.length === "long" ? config.maxLongSeconds : config.maxSeconds;
       if (total >= config.minSeconds && total <= maxS) break;
+      // Slightly over: speed the read up (max 8%, inaudible) instead of paying for another rewrite.
+      if (total > maxS && total <= maxS * 1.08) {
+        const tempo = audioDur / (maxS - 0.4 - LEAD - TAIL - PAUSE);
+        const fast = path.join(projectDir, "voice_fast.mp3");
+        await run("ffmpeg", ["-y", "-v", "error", "-i", voicePath, "-filter:a", `atempo=${tempo.toFixed(4)}`, fast]);
+        await rename(fast, voicePath);
+        audioDur = await probeDuration(voicePath);
+        log(`  voice sped up x${tempo.toFixed(3)} -> reel ${(audioDur + LEAD + TAIL + PAUSE).toFixed(1)}s`);
+        break;
+      }
       if (pass === 2) throw new StepError("tts", new Error(`reel length ${total.toFixed(1)}s outside ${config.minSeconds}-${maxS}s after rewrite`));
       const words = scriptPlain(script).split(/\s+/).length;
       const targetSec = total > maxS ? maxS - 6 : (config.minSeconds + config.maxSeconds) / 2;
