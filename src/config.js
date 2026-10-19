@@ -33,7 +33,7 @@ export const config = {
   checkModel: env("CHECK_MODEL", "anthropic/claude-haiku-5.5"),
   researchModel: env("RESEARCH_MODEL", "anthropic/claude-haiku-5.5"),
   researchResults: Number(env("RESEARCH_RESULTS", 6)), // web results per reel (~$0.004 each)
-  language: env("LANGUAGE", "hinglish"), // hinglish | english
+  language: env("LANGUAGE", "english"), // hinglish | english
   ttsModel: env("TTS_MODEL", "elevenlabs/eleven-v3"),
   ttsVoice: env("TTS_VOICE", "4yF24b9emqK8f4DBqL2Q"),
   // English reels use their own voice; empty falls back to TTS_MODEL / TTS_VOICE.

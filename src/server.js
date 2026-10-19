@@ -30,7 +30,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && req.url.startsWith("/plan")) {
       if (!authed) return send(res, 401, { ok: false, error: "unauthorized" });
       const q = new URL(req.url, "http://x").searchParams;
-      const languages = (q.get("languages") || "english,english,hindi").split(",");
+      const languages = (q.get("languages") || "english,english,english").split(",");
       const used = await usedSources();
       const usedIds = new Set([...used].filter((u) => u.startsWith("topic:")).map((u) => u.slice(6)));
       const picks = nextTopics(usedIds, languages.length);
