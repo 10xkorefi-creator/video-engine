@@ -38,7 +38,7 @@ export async function saveJob(row) {
 
 /** Source keys (blog URLs and topic:<id>) already used in reel_jobs. */
 export async function usedSources() {
-  const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?select=blog_url&limit=10000`;
+  const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?select=blog_url&status=neq.failed&limit=10000`; // failed topics (e.g. out of credits) get retried
   const rows = await (await http(url, { headers: headers() }, 30_000)).json();
   return new Set(rows.map((r) => r.blog_url));
 }
