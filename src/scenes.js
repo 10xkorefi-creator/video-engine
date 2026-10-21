@@ -12,7 +12,7 @@ export const SCENE_KINDS = {
   meter: "Explainer: rupee meter ticking up day by day. params: {value: exact figure from this beat e.g. '₹50', unit?: e.g. 'per day', label?}",
   split: "Explainer: two founders side by side, chaos vs calm system. params: {left_title, right_title, left_points: [2-3 short], right_points: [2-3 short]}",
   flow: "Explainer: 3-4 steps connected by animated arrows. params: {steps: [3-4 one-or-two-word steps], title?}",
-  paper_math: "Explainer on textured white paper: the working of a number is hand-written line by line (rows, an operator, a ruled line, the answer circled in red), like a teacher on paper. Use it whenever a beat EXPLAINS how a figure adds up or is calculated (interest, penalty, credit lost, time or money saved). params: {title?: 2-5 words, rows: [2-4 {label: 1-4 plain words, value: figure}], op?: '+'|'-'|'x'|'/', result: {label: 1-4 words, value: figure}, note?: 3-7 words}",
+  paper_math: "Explainer on textured white paper: the working of a number is hand-written line by line (rows, an operator, a ruled line, the answer circled in red), like a teacher on paper. Use it whenever a beat EXPLAINS how a figure adds up or is calculated (interest, penalty, credit lost, time or money saved). params: {title?: 2-5 words, rows: [2-4 {label: 1-4 plain words, value: figure}], op?: '+'|'-'|'x'|'/' (ONLY when result = the rows combined by that operation, e.g. ₹1,80,000 - ₹42,000 = ₹1,38,000; omit op for a list of facts like amount + date -> outcome), result: {label: 1-4 words, value: figure or short outcome}, note?: 3-7 words}",
 };
 
 const PRODUCT = new Set(["bills_flow", "bank_match", "gst_match", "whatsapp"]);

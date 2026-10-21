@@ -29,7 +29,7 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
     const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []) + "\n" + PRODUCT);
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
     // Word count is only a proxy: if length is the last problem left, let the measured voice decide (TTS loop trims).
-    const hard = errs.filter((e) => !e.startsWith("Too long"));
+    const hard = errs.filter((e) => !e.startsWith("Too long") && !e.startsWith("Show the worked example"));
     if (hard.length || (errs.length && attempt < 3)) { feedback = errs.join("\n"); lastIssues = errs; continue; }
     const [fc, pc] = await Promise.all([factCheck(blog, script, opts.research?.notes || []), plainCheck(script)]);
     costs.add("fact_check_llm", fc.cost + pc.cost);

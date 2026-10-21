@@ -42,8 +42,11 @@ function statBlock({ value = "", label = "" }, start, dur) {
 /** The working of a calculation: title, 2-4 rows, an operator, a ruled line, the circled result, a note. */
 function mathBlock(p, start, dur) {
   const rows = (Array.isArray(p.rows) ? p.rows : []).slice(0, 4).map((r) => (typeof r === "object" && r ? r : { label: "", value: String(r) }));
-  const op = OPS[String(p.op || "").trim()] || "";
   const res = p.result && typeof p.result === "object" ? p.result : p.result ? { label: "", value: String(p.result) } : null;
+  // Arithmetic signs only when the working is real arithmetic; a list of facts reads "→ outcome".
+  const numeric = (v) => /^\s*₹?\s*[\d.,]+\s*(lakh|crore|k|%|hours?|hrs?|days?|minutes?|mins?|bills?)?\s*$/i.test(String(v || ""));
+  const isMath = rows.every((r) => numeric(r.value)) && (!res || numeric(res.value));
+  const op = isMath ? OPS[String(p.op || "").trim()] || "" : "";
   const ev = [];
   let c = 0.2;
   if (p.title) {
@@ -81,7 +84,7 @@ function mathBlock(p, start, dur) {
             <span class="pp-l pencil pw" ${at(`l${j}`)}>${esc(r.label || "")}</span>
             <span class="pp-v ink pw" ${at(`v${j}`)} style="font-size:${vsize}px">${esc(r.value || "")}</span></div>`).join("")}
           ${res ? `<div class="pp-res">
-            <div class="pp-rl"><span class="pp-op ink pw" ${at("rv")}>=</span><span class="pencil pw" ${at("rl")}>${esc(res.label || "")}</span></div>
+            <div class="pp-rl"><span class="pp-op ink pw" ${at("rv")}>${isMath ? "=" : "→"}</span><span class="pencil pw" ${at("rl")}>${esc(res.label || "")}</span></div>
             <div class="pp-rv"><span class="pp-v red pw" ${at("rv")} style="font-size:${rsize}px">${esc(res.value)}</span></div></div>` : ""}
           ${p.note ? `<div class="pp-note blue pw" ${at("note")}>↳ ${esc(p.note)}</div>` : ""}
         </div>

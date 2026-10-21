@@ -85,7 +85,7 @@ VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, o
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
 - {"type":"scene","scene":"<kind>","params":{...}} animated explainer/product scene. Kinds:
 ${Object.entries(SCENE_KINDS).map(([k, d]) => `  * ${k}: ${d}`).join("\n")}
-  NUMBERS ON PAPER: whenever a beat explains how a figure comes about (adds up, multiplies, is lost, is saved), use paper_math and show the working with real figures from this beat (2-4 rows, then the result); a single headline figure uses stat. Every figure on paper must appear in that beat's text (or be a clearly hypothetical "let's say" example). Use paper_math at most twice per reel.
+  NUMBERS ON PAPER: if the story has a worked example with amounts or dates ("let's say ₹15 lakh...", interest, a penalty, credit lost, hours saved), you MUST show it with one paper_math scene on that beat. Whenever a beat explains how a figure comes about (adds up, multiplies, is lost, is saved), use paper_math and show the working with real figures from this beat (2-4 rows, then the result); a single headline figure uses stat. Every figure on paper must appear in that beat's text (or be a clearly hypothetical "let's say" example). Use paper_math at most twice per reel.
   Product scenes (bills_flow, bank_match, gst_match, whatsapp) ONLY on the beat(s) where AI Accountant is mentioned. Explainer scenes (deadline, meter, split, flow) whenever a process, deadline, ticking cost or comparison is being explained. Scene params are short on-screen labels in Latin script; any figure in params must appear in that beat's text.
 Use 4-7 non-footage visuals (stat/text/scene) total, at least 2 of them scenes when the story explains something. Never two text cards in a row. A scene may stay on screen for up to 2 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
 
@@ -134,6 +134,8 @@ export function validateShape(s) {
     const p = b.visual?.scene === "paper_math" ? b.visual.params || {} : null;
     if (p && (!Array.isArray(p.rows) || p.rows.length < 2 || !p.result?.value)) errs.push(`paper_math needs 2-4 rows of {label, value} and a result {label, value}: ${b.text}`);
   }
+  const worked = beats.find((b) => b.kind === "example" && /₹\s?\d|\d+\s?(lakh|crore|%|days|hours)/i.test(stripTags(b.text)));
+  if (worked && !beats.some((b) => b.visual?.scene === "paper_math")) errs.push(`Show the worked example on paper: give the beat "${stripTags(worked.text).slice(0, 80)}" a paper_math scene with its figures as rows and the outcome as the result.`);
   if (String(s.caption || "").length > 320) errs.push("caption too long: max 3 short lines, under 300 characters, starting with a hook line");
   if (/https?:\/\/|www\.|\.com\b/i.test(s.caption || "")) errs.push("caption must not contain any link or URL (the link goes in the first comment)");
   const onScreen = [s.title, s.caption, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
