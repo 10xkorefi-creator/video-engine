@@ -83,7 +83,7 @@ FACTS (strict)
 - Proof points (75%, 95% bills accuracy, 50+ banks, survey stats, 21-branch hotel) only exactly as written in CONTEXT section 4, and only when they serve the story.
 
 VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, offices, stress), animated scenes for EXPLAINING, paper for NUMBERS (stat = one big figure hand-written and circled on paper; paper_math = the working of a figure written out line by line).
-- {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday, never ambiguous words (say 'invoice paper' not 'bill') (e.g. 'indian shop owner', 'worried businessman phone', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
+- {"type":"footage","query":"2-3 word ENGLISH stock video search that LITERALLY shows what this beat's words are about (the invoice, the shop, the worried owner, the bank SMS), concrete and filmable, human and everyday, never ambiguous words (say 'invoice paper' not 'bill') (e.g. 'indian shop owner', 'worried businessman phone', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
 - {"type":"stat","value":"the exact figure as it appears in this beat's text","label":"2-5 word plain-English label"}
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
 - {"type":"scene","scene":"<kind>","params":{...}} animated explainer/product scene. Kinds:

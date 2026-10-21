@@ -11,7 +11,7 @@ function headers(extra = {}) {
 }
 
 /** Chat completion that returns parsed JSON + actual USD cost. */
-export async function chatJSON({ model, system, user, maxTokens = 8000, temperature = 0.8, effort = "low" }) {
+export async function chatJSON({ model, system, user, maxTokens = 8000, temperature = 0.8, effort = "low", images = [] }) {
   const res = await http(`${BASE}/chat/completions`, {
     method: "POST",
     headers: headers({ "Content-Type": "application/json" }),
@@ -25,7 +25,7 @@ export async function chatJSON({ model, system, user, maxTokens = 8000, temperat
       messages: [
         // Cache the long, constant system prompt: repeat drafts pay ~10% for it.
         { role: "system", content: system.length > 4000 ? [{ type: "text", text: system, cache_control: { type: "ephemeral" } }] : system },
-        { role: "user", content: user },
+        { role: "user", content: images.length ? [{ type: "text", text: user }, ...images.map((url) => ({ type: "image_url", image_url: { url } }))] : user },
       ],
     }),
   }, 180_000);

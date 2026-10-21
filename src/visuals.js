@@ -5,6 +5,7 @@ import { Readable } from "node:stream";
 import path from "node:path";
 import { config } from "./config.js";
 import { http, log, run } from "./util.js";
+import { chatJSON } from "./openrouter.js";
 
 const API = "https://pixabay.com/api";
 const keyParam = () => (config.pixabayKey ? `key=${config.pixabayKey}&` : "");
@@ -60,68 +61,101 @@ async function prepClip(src, dest, seconds) {
   return dest;
 }
 
+// Stock "film" results still include doodles and cartoons; those never match a real-world line.
+const BAD_TAGS = /\b(cartoon|doodle|animation|animated|illustration|drawing|sketch|clipart|vector|3d|render|motion graphics|infographic|whiteboard)\b/i;
+
 /**
- * Resolve every footage shot to a local asset (video, else photo, else a text-card fallback).
- * Returns shots with `asset: {kind, file, credit}`; files are copied into projectDir/media.
+ * Vision check: show the candidates' thumbnails next to the spoken line and score each 0-10.
+ * Returns { scores, better } where better is a fresh 2-3 word search if nothing fits.
+ */
+async function judge(line, query, cands) {
+  const { json, cost } = await chatJSON({
+    model: config.checkModel, temperature: 0, maxTokens: 1500,
+    system: `You pick B-roll for a vertical explainer reel for Indian small-business founders. You get the line the narrator says while the clip plays, and numbered thumbnails.
+Score each image 0-10 for how clearly it shows what the line is about, literally, so a viewer immediately connects picture and words. 8-10: shows the exact subject (e.g. an invoice for "invoice", a worried owner for "worried", a shop for "shopkeeper"). 5-7: same setting and mood. 0-4: unrelated object or scene, cartoon/drawing/animation, abstract, mostly text, a watermark, or a mismatched culture or setting.
+Return ONLY JSON: {"scores":[one integer per image, in order],"better":"if every score is below 6, a 2-3 word ENGLISH stock-video search that would find a fitting real-world clip, else empty"}`,
+    user: `Narrator line: "${line}"\nSearch used: "${query}"\nImages 1-${cands.length} follow.`,
+    images: cands.map((c) => c.thumb),
+  });
+  return { scores: Array.isArray(json.scores) ? json.scores.map(Number) : [], better: String(json.better || "").trim(), cost };
+}
+
+/** Up to 5 usable video candidates and 3 photo candidates for one search. */
+async function candidates(query, need, used, cache) {
+  if (!cache.has(query)) {
+    const [v, p] = await Promise.all([searchVideos(query).catch(() => []), searchPhotos(query).catch(() => [])]);
+    cache.set(query, { v, p });
+  }
+  const { v, p } = cache.get(query);
+  const vids = v.filter((h) => !used.has(`v${h.id}`) && !BAD_TAGS.test(h.tags || "") && pickRendition(h, need))
+    .slice(0, 5).map((h) => ({ kind: "video", hit: h, thumb: h.videos?.small?.thumbnail || h.videos?.tiny?.thumbnail }));
+  const pics = p.filter((h) => !used.has(`p${h.id}`) && !BAD_TAGS.test(h.tags || "")).slice(0, 3)
+    .map((h) => ({ kind: "image", hit: h, thumb: h.webformatURL }));
+  return [...vids, ...pics].filter((c) => c.thumb);
+}
+
+/**
+ * Resolve every footage shot to a relevant local asset: the best-scoring video or photo for the
+ * spoken line (vision-checked), else a text card. Returns shots with `asset: {kind, file}`.
  */
 export async function resolveVisuals(shots, projectDir) {
   const used = new Set();
-  const searches = new Map();
+  const cache = new Map();
   const mediaDir = path.join(projectDir, "media");
   await mkdir(mediaDir, { recursive: true });
   const credits = [];
+  let cost = 0;
 
   for (const [i, shot] of shots.entries()) {
     if (shot.visual?.type !== "footage") continue;
-    const q = shot.visual.query || "business office";
+    const line = String(shot.beatText || "").replace(/\[[^\]]*\]\s*/g, "");
     const need = shot.end - shot.start + 0.6;
-    const queries = [q, q.split(" ").slice(-1)[0] + " business", "office work"];
-    let done = false;
+    let query = shot.visual.query || "business office";
+    let pick = null;
 
-    for (const query of queries) {
-      if (!searches.has(query)) searches.set(query, await searchVideos(query).catch(() => []));
-      for (const hit of searches.get(query)) {
-        if (used.has(`v${hit.id}`)) continue;
-        const rend = pickRendition(hit, need);
-        if (!rend) continue;
-        used.add(`v${hit.id}`);
-        try {
-          const raw = await download(rend.url, path.join(config.cacheDir, "pixabay", `v${hit.id}_${rend.width}.mp4`));
-          const file = await prepClip(raw, path.join(mediaDir, `shot${i}.mp4`), need);
-          shot.asset = { kind: "video", file: `media/shot${i}.mp4` };
-          credits.push(`Pixabay video ${hit.id} by ${hit.user}`);
-          done = true;
-        } catch (e) {
-          log(`  clip ${hit.id} failed: ${e.message}`);
-        }
-        break;
-      }
-      if (done) break;
-    }
-
-    if (!done) {
-      // Photo fallback (Ken Burns still).
-      for (const query of queries) {
-        const hits = await searchPhotos(query).catch(() => []);
-        const hit = hits.find((h) => !used.has(`p${h.id}`));
-        if (!hit) continue;
-        used.add(`p${hit.id}`);
-        const ext = path.extname(new URL(hit.largeImageURL).pathname) || ".jpg";
-        const raw = await download(hit.largeImageURL, path.join(config.cacheDir, "pixabay", `p${hit.id}${ext}`));
-        const dest = path.join(mediaDir, `shot${i}${ext}`);
-        await run("cp", [raw, dest]);
-        shot.asset = { kind: "image", file: `media/shot${i}${ext}` };
-        credits.push(`Pixabay photo ${hit.id} by ${hit.user}`);
-        done = true;
-        break;
+    for (let round = 0; round < 2 && !pick; round++) {
+      const cands = await candidates(query, need, used, cache);
+      if (!cands.length) { query = query.split(" ").slice(-1)[0] + " business"; continue; }
+      const asked = query;
+      try {
+        const j = await judge(line, query, cands);
+        cost += j.cost;
+        const best = j.scores.reduce((bi, sc, k) => (sc > (j.scores[bi] ?? -1) || (sc === j.scores[bi] && cands[k].kind === "video" && cands[bi].kind !== "video") ? k : bi), 0);
+        if ((j.scores[best] ?? 0) >= 6) pick = cands[best];
+        else if (j.better) query = j.better;
+        log(`  shot${i} "${asked}": scores ${j.scores.join(",")}${pick ? ` -> ${pick.kind} ${pick.hit.id}` : ""}`);
+      } catch (e) {
+        log(`  visual check failed (${e.message}); using top result`);
+        pick = cands[0];
       }
     }
-    if (!done) {
-      log(`  no media for "${q}", using text card`);
-      shot.asset = { kind: "none" };
+
+    if (pick?.kind === "video") {
+      used.add(`v${pick.hit.id}`);
+      const rend = pickRendition(pick.hit, need);
+      try {
+        const raw = await download(rend.url, path.join(config.cacheDir, "pixabay", `v${pick.hit.id}_${rend.width}.mp4`));
+        await prepClip(raw, path.join(mediaDir, `shot${i}.mp4`), need);
+        shot.asset = { kind: "video", file: `media/shot${i}.mp4` };
+        credits.push(`Pixabay video ${pick.hit.id} by ${pick.hit.user}`);
+        continue;
+      } catch (e) {
+        log(`  clip ${pick.hit.id} failed: ${e.message}`);
+      }
     }
+    if (pick?.kind === "image") {
+      used.add(`p${pick.hit.id}`);
+      const ext = path.extname(new URL(pick.hit.largeImageURL).pathname) || ".jpg";
+      const raw = await download(pick.hit.largeImageURL, path.join(config.cacheDir, "pixabay", `p${pick.hit.id}${ext}`));
+      await run("cp", [raw, path.join(mediaDir, `shot${i}${ext}`)]);
+      shot.asset = { kind: "image", file: `media/shot${i}${ext}` };
+      credits.push(`Pixabay photo ${pick.hit.id} by ${pick.hit.user}`);
+      continue;
+    }
+    log(`  no relevant media for "${line.slice(0, 60)}", using text card`);
+    shot.asset = { kind: "none" };
   }
-  return { shots, credits };
+  return { shots, credits, cost };
 }
 
 export async function fileSize(f) { return (await stat(f)).size; }

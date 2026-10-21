@@ -138,7 +138,8 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
     const capWords = roman.words ? stt.words.map((w, i) => ({ ...w, cap: roman.words[i] })) : stt.words;
     const timeline = buildTimeline(script, capWords, { audioDuration: audioDur, lead: LEAD, tail: TAIL, pause: PAUSE });
 
-    const { credits } = await step("assets", () => resolveVisuals(timeline.shots, projectDir));
+    const { credits, cost: visualCost } = await step("assets", () => resolveVisuals(timeline.shots, projectDir));
+    costs.add("visual_check_llm", visualCost);
 
     const bed = angleKey === "B" ? "bed_b" : "bed_a";
     // Saved so visuals can be re-composed and re-rendered without new API calls (tools/recompose.mjs).
