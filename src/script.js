@@ -35,7 +35,7 @@ const LANG = {
 - Everything in Latin script, digits ASCII.
 - ENGLISH ONLY: every spoken word is English (Indian terms like lakh, crore, CA are fine). The Hindi phrases in the rules below only illustrate tone; write their English equivalent ("Let's say...", "Most founders get this wrong"). No Hindi words, no Devanagari.`,
     words: [110, 130],
-    beatWords: "4-14",
+    beatWords: "8-22",
   },
 };
 
@@ -53,7 +53,8 @@ STORY FIRST, RULES SECOND
 - STAY ON TOPIC: the story must be about the blog's main subject (BLOG TITLE / SEARCH KEYWORD). Research notes only add colour and stakes; never switch to a different subject.
 - Build the reel around ONE relatable human situation (a founder, a shop owner, a D2C brand, a manufacturer) and its consequence in money, time or stress. Rules, figures and facts appear ONLY when the story needs them to land, as the punchline or the stakes, never as a list.
 - Jargon budget: at most 2 technical terms in the whole reel, each instantly explained in everyday words ("ITC, यानी जो GST आप पहले ही दे चुके हो"). No section numbers, form numbers or acronyms unless one IS the hook. Prefer "notice", "penalty", "late fee", "cash stuck" over legal terms.
-- Max 3 real figures (rates, penalties, deadlines) in the whole reel.
+- ONE IDEA PER REEL. Pick the single most useful thing a founder should learn about this topic (one rule, one mistake, or one habit) and teach only that. Cut every side fact, exception and second rule, however interesting (they can be other reels). The viewer must be able to repeat the one idea after watching.
+- Max 2 real figures in the whole reel, both serving the one idea.
 - Be DECISIVE. Bold, confident claims make founders trust the voice: "ज़्यादातर founders ये गलती करते हैं", "ये एक habit आपके लाखों बचा सकती है", "सरकार आपका इंतज़ार नहीं करेगी". Fine as long as it is an honest, fair reading of the sources (no white lies). Specific rates, penalties, deadlines, rules and real cases must still be exactly right.
 - Talk to the viewer ("आप"), use concrete everyday images (chai, Diwali stock, the CA's WhatsApp, the bank SMS), and one light witty line.
 
@@ -62,10 +63,12 @@ ${lang().voice}
 STRUCTURE (beats in this order): hook -> setup -> story -> twist -> takeaway -> cta.
 - hook: ONE beat, max 7 words, first sentence max 4 words, lands in under 2 seconds. A relatable shock, a myth, or a question every founder has asked. No greetings, no "did you know".
 - setup: the founder and situation in 1-2 beats.
-- story: 3-5 beats of what happens, with the stakes. Facts only where they raise the stakes.
+- story: 2-4 beats of what happens, with the stakes. This is where the one idea is EXPLAINED, slowly and clearly, usually on the paper canvas.
 - twist: the reveal that reframes everything.
 - takeaway: one simple, doable habit or quotable line (not tax advice beyond the blog).
 - cta: exactly one beat (text given above).
+
+PACING: 8-11 beats in total, each beat one clear sentence or two (8-22 spoken words). Fewer, longer beats beat many quick cuts: the viewer must have time to understand each picture.
 
 FACTS (strict)
 - Every real-world claim (rate, penalty, deadline, rule, statistic, real case) must come from the BLOG POST or the RESEARCH NOTES. Never invent real cases, company names, statistics or rules. Prefer research notes when newer.
@@ -73,7 +76,7 @@ FACTS (strict)
 - When you simplify, keep the meaning EXACT: interest stays interest (not penalty), "per year" or "per month" stays, a deadline stays the same kind of deadline. Big-picture stakes ("लाखों", "हज़ारों का नुकसान") are fine when the sources make them plausible for a typical SMB; never put an exact made-up amount on them.
 - Real figures: digits exactly as in the source ("Rs 50 lakh" -> "₹50 lakh"). Never spell numbers as words.
 - Read aloud by a voice engine: no parentheses, slashes or abbreviations.
-- LENGTH: default is a 45-60 second reel: ${lang().words[0]}-${lang().words[1]} spoken words, 12-16 beats. Prefer this. ONLY if the story or the explanation genuinely cannot land in 60 seconds, you may go long (up to 3 minutes, max 400 words, up to 40 beats); then set "length":"long" and give a one-line "length_reason". Never pad. Each beat ${lang().beatWords} words, one idea, short sentences.
+- LENGTH: default is a 45-60 second reel: ${lang().words[0]}-${lang().words[1]} spoken words, 8-11 beats. Prefer this. ONLY if the story or the explanation genuinely cannot land in 60 seconds, you may go long (up to 3 minutes, max 400 words, up to 30 beats); then set "length":"long" and give a one-line "length_reason". Never pad. Each beat ${lang().beatWords} words, one idea, short sentences.
 - The takeaway must agree with the blog's recommendations.
 - BRAND (see AiA CONTEXT): the reel's job is fun, engaging storytelling about a mundane accounting topic, not selling. Whenever the story shows a problem AiA directly solves (CONTEXT sections 2-3: typing bills by hand, messy/handwritten bills, bank statement entry, GSTR-2B matching, accountant churn/backlog, no real-time numbers, duplicate bills, choosing or switching software), you SHOULD weave AI Accountant in ONCE, inside the story, as the smart founder's move, with one concrete thing it does, describing it as working on top of Tally, never as accounting software. If the problem is a deadline, a rule or a registration, do NOT mention AiA (the CTA already does). No generic tag-on lines, no "best"/"number one", no pricing, no unlaunched features.
 - Competitors and alternatives (Tally's Docs by Ira, Suvit, Zoho Books, Excel imports, generic OCR) may be named only when the story is about choosing a tool, using ONLY the facts in CONTEXT section 6, fairly and without mockery, with the contrast naturally favouring AiA. Never make specific claims about VouchrIt.
@@ -85,9 +88,9 @@ VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, o
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
 - {"type":"scene","scene":"<kind>","params":{...}} animated explainer/product scene. Kinds:
 ${Object.entries(SCENE_KINDS).map(([k, d]) => `  * ${k}: ${d}`).join("\n")}
-  NUMBERS ON PAPER: if the story has a worked example with amounts or dates ("let's say ₹15 lakh...", interest, a penalty, credit lost, hours saved), you MUST show it with one paper_math scene on that beat. Whenever a beat explains how a figure comes about (adds up, multiplies, is lost, is saved), use paper_math and show the working with real figures from this beat (2-4 rows, then the result); a single headline figure uses stat. Every figure on paper must appear in that beat's text (or be a clearly hypothetical "let's say" example). Use paper_math at most twice per reel.
+  THE CANVAS (most important): the explanation of the one idea happens on ONE paper canvas (paper_math) that stays on screen for 2-4 consecutive beats while the voice walks through it, like a teacher writing on paper. Each line is written at the moment the voice says it, so the order of rows must match the order they are spoken, and every row value must be said aloud in those beats exactly as written on the paper. Put the SAME paper_math object on each of those consecutive beats (it is drawn once and fills in as you speak). If the story has a worked example with amounts or dates ("let's say ₹15 lakh...", interest, a penalty, credit lost, hours saved), it MUST be on the canvas. Use one canvas per reel (two only if truly needed). A single headline figure outside the canvas uses stat. Every figure on paper must appear in the spoken text (or be a clearly hypothetical "let's say" example).
   Product scenes (bills_flow, bank_match, gst_match, whatsapp) ONLY on the beat(s) where AI Accountant is mentioned. Explainer scenes (deadline, meter, split, flow) whenever a process, deadline, ticking cost or comparison is being explained. Scene params are short on-screen labels in Latin script; any figure in params must appear in that beat's text.
-Use 4-7 non-footage visuals (stat/text/scene) total, at least 2 of them scenes when the story explains something. Never two text cards in a row. A scene may stay on screen for up to 2 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
+Keep the visuals calm: about 5-7 distinct visuals in the whole reel. Footage for the hook and the human moments only, the canvas for the explanation, at most one other scene and at most one text card. Never two text cards in a row. A scene may stay on screen for up to 4 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
 
 Also return "keywords" per beat: 0-3 words copied exactly from that beat's text to highlight in captions (numbers, the key noun).
 
@@ -122,7 +125,7 @@ export function validateShape(s) {
   const beats = s.beats || [];
   const [lo, hi] = lang().words;
   const long = s.length === "long";
-  if (beats.length < 10 || beats.length > (long ? 42 : 18)) errs.push(`beat count ${beats.length} (want ${long ? "up to 40" : "12-16"})`);
+  if (beats.length < 7 || beats.length > (long ? 30 : 13)) errs.push(`beat count ${beats.length} (want ${long ? "up to 30" : "8-11"})`);
   const words = beats.reduce((n, b) => n + countWords(b.text), 0);
   const max = long ? 420 : hi + 50; // real length is enforced on measured voice duration
   if (words > max) errs.push(`Too long: ${words} spoken words. Cut about ${words - (long ? 400 : hi)} words: drop or merge beats, shorten sentences.${long ? "" : ` Or, only if the story truly needs it, mark "length":"long".`}`);
@@ -134,6 +137,14 @@ export function validateShape(s) {
     const p = b.visual?.scene === "paper_math" ? b.visual.params || {} : null;
     if (p && (!Array.isArray(p.rows) || p.rows.length < 2 || !p.result?.value)) errs.push(`paper_math needs 2-4 rows of {label, value} and a result {label, value}: ${b.text}`);
   }
+  // Focus: count distinct real figures outside the worked example (and the CTA). More than 2 = more than one idea.
+  const facts = new Set();
+  for (const b of beats) {
+    if (b.kind === "example" || b.role === "cta" || b.visual?.scene === "paper_math") continue;
+    for (const m of stripTags(b.text).matchAll(/\d+(?:[.,]\d+)*/g)) facts.add(m[0]);
+    for (const m of stripTags(b.text).matchAll(/\b(twice|three times|double|half)\b/gi)) facts.add(m[0].toLowerCase());
+  }
+  if (facts.size > 2) errs.push(`Too many ideas for one reel (figures: ${[...facts].join(", ")}). Teach ONE idea: keep only the figures that idea needs and cut side rules, exceptions and extra penalties.`);
   const worked = beats.find((b) => b.kind === "example" && /₹\s?\d|\d+\s?(lakh|crore|%|days|hours)/i.test(stripTags(b.text)));
   if (worked && !beats.some((b) => b.visual?.scene === "paper_math")) errs.push(`Show the worked example on paper: give the beat "${stripTags(worked.text).slice(0, 80)}" a paper_math scene with its figures as rows and the outcome as the result.`);
   if (String(s.caption || "").length > 320) errs.push("caption too long: max 3 short lines, under 300 characters, starting with a hook line");
@@ -160,7 +171,16 @@ BLOG POST:
 ${blog.text}
 """`;
   const { json, cost } = await chatJSON({ model: config.scriptModel, system: `${system()}\n\nAiA CONTEXT (product, proof points, competitors; only source for claims about AI Accountant and competitors):\n${PRODUCT}`, user: user.replace("<BLOG_URL>", blog.url) });
-  return { script: json, cost };
+  return { script: normalizeVisuals(json), cost };
+}
+
+/** Models sometimes write {"type":"paper_math"} instead of {"type":"scene","scene":"paper_math"}. */
+function normalizeVisuals(script) {
+  for (const b of script?.beats || []) {
+    const v = b.visual;
+    if (v && SCENE_KINDS[v.type]) b.visual = { type: "scene", scene: v.type, params: v.params || {} };
+  }
+  return script;
 }
 
 /** Cheap second model checks every claim against the post. */

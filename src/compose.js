@@ -9,7 +9,7 @@ const W = 1080;
 const H = 1920;
 const f = (n) => Number(n).toFixed(3);
 
-const TRANSITIONS = ["whip", "punch", "whipUp", "punch", "flash"];
+const TRANSITIONS = ["whip", "fade", "whipUp", "fade"];
 
 /** Largest font size (px) at which `text` fits `width` on one line (approx. glyph width ratio). */
 const fitSize = (text, max, width, ratio) => Math.floor(Math.min(max, width / (Math.max(1, String(text).length) * ratio)));
@@ -64,7 +64,7 @@ function audioHtml(tl, { bed }) {
     a.push(`<audio id="sfx${i}" src="assets/audio/${sfx[0]}.mp3" data-start="${f(st)}" data-duration="${sfx[2]}" data-volume="${sfx[1]}"></audio>`);
   });
   tl.shots.forEach((s, i) => (s.paper?.cues || []).forEach((c, k) =>
-    a.push(`<audio id="pen${i}_${k}" src="assets/audio/scribble.mp3" data-start="${f(c.t)}" data-duration="${f(Math.min(0.7, c.d + 0.08))}" data-volume="0.38"></audio>`)));
+    a.push(`<audio id="pen${i}_${k}" src="assets/audio/scribble.mp3" data-start="${f(c.t)}" data-duration="${f(Math.min(0.6, c.d))}" data-volume="0.09" data-fade-out="0.15"></audio>`)));
   if (tl.twistAt) {
     a.push(`<audio id="riser" src="assets/audio/riser.mp3" data-start="${f(Math.max(0, tl.twistAt - 1.6))}" data-duration="1.6" data-volume="0.4"></audio>`);
     a.push(`<audio id="hit" src="assets/audio/impact.mp3" data-start="${f(tl.twistAt)}" data-duration="1.0" data-volume="0.5"></audio>`);
@@ -106,7 +106,8 @@ ${PAPER_JS}
         // entrance transition
         if (s.tr === "whip") tl.fromTo(el, { xPercent: i % 2 ? -100 : 100 }, { xPercent: 0, duration: 0.24, ease: "expo.out" }, s.start);
         else if (s.tr === "whipUp") tl.fromTo(el, { yPercent: 100 }, { yPercent: 0, duration: 0.26, ease: "expo.out" }, s.start);
-        else if (s.tr === "punch") tl.fromTo(el, { scale: 1.35, opacity: 0.2 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power3.out" }, s.start);
+        else if (s.tr === "punch") tl.fromTo(el, { scale: 1.12, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.35, ease: "power3.out" }, s.start);
+        else if (s.tr === "fade") tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, s.start);
         else if (s.tr === "flash") tl.fromTo("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.25, ease: "power1.out", immediateRender: false }, s.start);
         // motion on every scene
         // brand mark only on clean cards/explainer scenes, never over footage or product UI
@@ -201,8 +202,10 @@ export async function writeProject(projectDir, { timeline, title, bed }) {
   // Numbers are explained on paper: every stat card and every paper_math scene.
   for (const s of tl.shots) {
     const v = s.visual || {};
-    if (v.type === "stat") s.paper = paperBlock("stat", { value: v.value, label: v.label }, s.start, s.end - s.start);
-    else if (v.type === "scene" && v.scene === "paper_math") s.paper = paperBlock("math", v.params, s.start, s.end - s.start);
+    // ink follows the voice: each figure is written when it is spoken
+    const words = tl.captions.flatMap((c) => c.words).filter((w) => w.start >= s.start - 0.05 && w.start < s.end);
+    if (v.type === "stat") s.paper = paperBlock("stat", { value: v.value, label: v.label }, s.start, s.end - s.start, words);
+    else if (v.type === "scene" && v.scene === "paper_math") s.paper = paperBlock("math", v.params, s.start, s.end - s.start, words);
   }
   const html = `<!doctype html>
 <html lang="en">

@@ -56,7 +56,7 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
     end: i + 1 < beats.length ? W[starts[i + 1]].start - 0.08 : total,
   }));
 
-  // Shots: split long footage beats so the picture changes every <=3.6s.
+  // Shots: long footage beats are split so a clip never runs past ~5.5s (calm pacing).
   const shots = [];
   beatWin.forEach((b, bi) => {
     const len = b.end - b.start;
@@ -67,7 +67,14 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
       prev.end = b.end;
       return;
     }
-    const n = isFootage ? Math.max(1, Math.ceil(len / 3.6)) : 1;
+    // The paper canvas builds up over consecutive beats: keep one sheet, use the fullest version.
+    if (b.visual?.scene === "paper_math" && prev?.visual?.scene === "paper_math") {
+      const rows = (v) => (v.params?.rows || []).length + (v.params?.result ? 1 : 0);
+      if (rows(b.visual) >= rows(prev.visual)) prev.visual = b.visual;
+      prev.end = b.end;
+      return;
+    }
+    const n = isFootage ? Math.max(1, Math.ceil(len / 5.5)) : 1;
     for (let k = 0; k < n; k++) {
       shots.push({
         beat: bi, part: k, role: b.role, visual: b.visual, beatText: b.text,

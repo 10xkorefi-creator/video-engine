@@ -29,7 +29,7 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
     const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []) + "\n" + PRODUCT);
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
     // Word count is only a proxy: if length is the last problem left, let the measured voice decide (TTS loop trims).
-    const hard = errs.filter((e) => !e.startsWith("Too long") && !e.startsWith("Show the worked example"));
+    const hard = errs.filter((e) => !e.startsWith("Too long") && !e.startsWith("Show the worked example") && !e.startsWith("Too many ideas"));
     if (hard.length || (errs.length && attempt < 3)) { feedback = errs.join("\n"); lastIssues = errs; continue; }
     const [fc, pc] = await Promise.all([factCheck(blog, script, opts.research?.notes || []), plainCheck(script)]);
     costs.add("fact_check_llm", fc.cost + pc.cost);
@@ -141,6 +141,8 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
     const { credits } = await step("assets", () => resolveVisuals(timeline.shots, projectDir));
 
     const bed = angleKey === "B" ? "bed_b" : "bed_a";
+    // Saved so visuals can be re-composed and re-rendered without new API calls (tools/recompose.mjs).
+    await writeFile(path.join(projectDir, "timeline.json"), JSON.stringify({ timeline, title: script.title, bed }));
     await step("compose", () => writeProject(projectDir, { timeline, title: script.title, bed }), { retries: 0 });
 
     const mp4 = path.join(dir, `${jobId}.mp4`);

@@ -8,23 +8,47 @@ const OPS = { "+": "+", "-": "−", "−": "−", "x": "×", "×": "×", "*": "�
 const fit = (text, max, width, ratio) => Math.floor(Math.min(max, width / (Math.max(1, String(text).length) * ratio)));
 const writeDur = (text) => Math.min(0.75, Math.max(0.28, String(text).length * 0.055));
 
-/** Lay out events on a relative clock, then squeeze them into the shot if it is short. */
+/** Fit events into the shot. Only items that would run past the end are pulled in (and sped up),
+ *  so lines synced to the voice keep their spoken timing. */
 function schedule(events, dur) {
-  const end = Math.max(...events.map((e) => e.t + e.d), 0.1);
   const room = Math.max(0.8, dur - 0.35);
-  const k = end > room ? room / end : 1;
-  return events.map((e) => ({ ...e, t: e.t * k, d: Math.max(0.14, e.d * k) }));
+  return events.map((e) => {
+    const d = Math.max(0.14, Math.min(e.d, room * 0.25));
+    return { ...e, d, t: Math.max(0, Math.min(e.t, room - d)) };
+  });
+}
+
+// When is a figure spoken? Match its most distinctive token ("15" in "₹15 lakh", "june" in "1 June",
+// "138000" in "₹1,38,000") against the word timings inside this shot. Returns a shot-relative time.
+const norm = (x) => String(x).toLowerCase().replace(/[,₹]/g, "").replace(/[^a-z0-9.%]/g, "");
+const ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split(" ");
+const TENS = "  twenty thirty forty fifty sixty seventy eighty ninety".split(" ");
+const inWords = (n) => (n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? ONES[n % 10] : "") : null);
+function spokenAt(value, words, start, after) {
+  const toks = String(value || "").split(/\s+/).map(norm).filter(Boolean);
+  // most distinctive first: multi-digit numbers (also as words: "fifteen"), then longer words, then single digits
+  const cands = [];
+  for (const t of toks.filter((t) => /^\d+$/.test(t) && t.length >= 2)) cands.push(t, inWords(+t));
+  cands.push(...toks.filter((t) => !/\d/.test(t) && t.length >= 3).sort((a, b) => b.length - a.length));
+  for (const t of toks.filter((t) => /\d/.test(t))) cands.push(t, /^\d+$/.test(t) ? inWords(+t) : null);
+  for (const key of cands.filter(Boolean)) {
+    // a figure spoken a moment before the pen is free still belongs to this line
+    const w = words.find((x) => x.start - start >= after - 1.5 && (norm(x.text) === key || (key.length >= 4 && norm(x.text).includes(key))));
+    if (w) return w.start - start;
+  }
+  return null;
 }
 
 const attr = (e, start) => `data-t="${(start + e.t).toFixed(3)}" data-d="${e.d.toFixed(3)}"`;
 
 /** One big figure: written in marker, circled in red, label in pencil with a highlighter swipe. */
-function statBlock({ value = "", label = "" }, start, dur) {
+function statBlock({ value = "", label = "" }, start, dur, words = []) {
   const ev = [];
-  ev.push({ id: "val", t: 0.2, d: writeDur(value) + 0.1, sfx: true });
+  const said = spokenAt(value, words, start, 0);
+  ev.push({ id: "val", t: said != null ? Math.max(0.15, said - 0.1) : 0.2, d: writeDur(value) + 0.1, sfx: true });
   ev.push({ id: "ring", t: ev[0].t + ev[0].d + 0.05, d: 0.5 });
   ev.push({ id: "hl", t: ev[1].t + 0.25, d: 0.35 });
-  ev.push({ id: "lab", t: ev[1].t + 0.3, d: writeDur(label), sfx: true });
+  ev.push({ id: "lab", t: ev[1].t + 0.3, d: writeDur(label) });
   const s = Object.fromEntries(schedule(ev, dur).map((e) => [e.id, e]));
   const size = fit(value, 250, 860, 0.5);
   const html = `<div class="sc ppr" data-paper="stat" data-focus=".pp-val">
@@ -40,7 +64,7 @@ function statBlock({ value = "", label = "" }, start, dur) {
 }
 
 /** The working of a calculation: title, 2-4 rows, an operator, a ruled line, the circled result, a note. */
-function mathBlock(p, start, dur) {
+function mathBlock(p, start, dur, words = []) {
   const rows = (Array.isArray(p.rows) ? p.rows : []).slice(0, 4).map((r) => (typeof r === "object" && r ? r : { label: "", value: String(r) }));
   const res = p.result && typeof p.result === "object" ? p.result : p.result ? { label: "", value: String(p.result) } : null;
   // Arithmetic signs only when the working is real arithmetic; a list of facts reads "→ outcome".
@@ -50,17 +74,25 @@ function mathBlock(p, start, dur) {
   const ev = [];
   let c = 0.2;
   if (p.title) {
-    ev.push({ id: "title", t: c, d: writeDur(p.title), sfx: true });
-    ev.push({ id: "uline", t: c + writeDur(p.title) - 0.05, d: 0.3 });
-    c += writeDur(p.title) + 0.25;
+    const td = Math.min(0.45, writeDur(p.title));
+    ev.push({ id: "title", t: 0.05, d: td });
+    ev.push({ id: "uline", t: 0.05 + td - 0.05, d: 0.25 });
+    c = 0.05 + td + 0.15;
   }
+  // Each value is written as it is spoken (label just before it); unspoken ones follow the previous line.
   rows.forEach((r, j) => {
     const dl = writeDur(r.label || ""), dv = writeDur(r.value || "");
-    if (r.label) ev.push({ id: `l${j}`, t: c, d: dl });
-    ev.push({ id: `v${j}`, t: c + (r.label ? dl * 0.55 : 0), d: dv, sfx: true });
-    c += Math.max((r.label ? dl * 0.55 : 0) + dv, 0.45) + 0.18;
+    const lead = r.label ? dl * 0.6 : 0;
+    const said = spokenAt(r.value, words, start, c);
+    const tv = Math.max(c + lead, said != null ? said - 0.12 : c + lead);
+    if (r.label) ev.push({ id: `l${j}`, t: tv - lead, d: dl });
+    ev.push({ id: `v${j}`, t: tv, d: dv, sfx: true });
+    c = tv + Math.max(dv, 0.45) + 0.18;
   });
   if (res) {
+    const said = spokenAt(res.value, words, start, c);
+    const rlead = 0.32 + (res.label ? 0.2 : 0);
+    if (said != null && said - 0.12 - rlead > c) c = said - 0.12 - rlead;
     ev.push({ id: "rule", t: c, d: 0.3 });
     c += 0.32;
     if (res.label) ev.push({ id: "rl", t: c, d: writeDur(res.label) });
@@ -69,19 +101,22 @@ function mathBlock(p, start, dur) {
     ev.push({ id: "ring", t: c, d: 0.5 });
     c += 0.45;
   }
-  if (p.note) ev.push({ id: "note", t: c, d: writeDur(p.note), sfx: true });
+  if (p.note) ev.push({ id: "note", t: c, d: writeDur(p.note) });
   const sch = schedule(ev, dur);
   const s = Object.fromEntries(sch.map((e) => [e.id, e]));
   const at = (id) => (s[id] ? attr(s[id], start) : "");
-  const vsize = Math.min(...rows.map((r) => fit(r.value, 90, 520, 0.5)), 90);
-  const rsize = res ? fit(res.value, 150, 800, 0.5) : 0;
+  // fewer lines = bigger writing, so the sheet is used properly
+  const big = rows.length <= 2;
+  const vsize = Math.min(...rows.map((r) => fit(r.value, big ? 120 : 90, big ? 560 : 520, 0.5)), big ? 120 : 90);
+  const lsize = big ? 78 : 64;
+  const rsize = res ? fit(res.value, big ? 180 : 150, 820, 0.5) : 0;
   const html = `<div class="sc ppr" data-paper="math" data-focus="${res ? ".pp-res .pp-v" : ".pp-rows"}">
       <div class="pp-cam">
         ${p.title ? `<div class="pp-title pw blue" ${at("title")}>${esc(p.title)}</div><svg class="pp-ink"><path class="pd blue" data-under=".pp-title" ${at("uline")}></path></svg>` : ""}
         <div class="pp-rows${p.title ? "" : " notitle"}">
-          ${rows.map((r, j) => `<div class="pp-row">
+          ${rows.map((r, j) => `<div class="pp-row" style="min-height:${big ? 160 : 120}px">
             <span class="pp-op ink pw" ${at(`v${j}`)}>${j === rows.length - 1 && op && rows.length > 1 ? op : ""}</span>
-            <span class="pp-l pencil pw" ${at(`l${j}`)}>${esc(r.label || "")}</span>
+            <span class="pp-l pencil pw" ${at(`l${j}`)} style="font-size:${lsize}px">${esc(r.label || "")}</span>
             <span class="pp-v ink pw" ${at(`v${j}`)} style="font-size:${vsize}px">${esc(r.value || "")}</span></div>`).join("")}
           ${res ? `<div class="pp-res">
             <div class="pp-rl"><span class="pp-op ink pw" ${at("rv")}>${isMath ? "=" : "→"}</span><span class="pencil pw" ${at("rl")}>${esc(res.label || "")}</span></div>
@@ -95,8 +130,8 @@ function mathBlock(p, start, dur) {
 }
 
 /** kind: "stat" (params {value,label}) or "math" (paper_math params). */
-export function paperBlock(kind, params, start, dur) {
-  return kind === "stat" ? statBlock(params || {}, start, dur) : mathBlock(params || {}, start, dur);
+export function paperBlock(kind, params, start, dur, words = []) {
+  return kind === "stat" ? statBlock(params || {}, start, dur, words) : mathBlock(params || {}, start, dur, words);
 }
 
 // Paper texture: warm off-white, faint grid, a red margin line, fibre noise and an edge vignette.
@@ -158,12 +193,12 @@ export const PAPER_JS = `
       function paperAnim(tl, shot, start, dur) {
         const sc = shot.querySelector(".sc.ppr"), cam = sc.querySelector(".pp-cam");
         const T = (e) => parseFloat(e.dataset.t), D = (e) => parseFloat(e.dataset.d);
-        // keep the paper clear of the caption band (y > 1070): drop the note, then shrink the sheet if still too tall
+        // keep the paper clear of the caption text (y > 1150): drop the note, then shrink the sheet if still too tall
         const note = sc.querySelector(".pp-note");
         const bottom = () => Math.max(...[...cam.children].filter((n) => n.tagName !== "svg").map((n) => { const b = offsetIn(n, cam); return b.y + b.h; }));
-        if (note && bottom() > 1070) note.style.display = "none";
+        if (note && bottom() > 1150) note.style.display = "none";
         const rows = sc.querySelector(".pp-rows");
-        if (rows && bottom() > 1070) { const b = offsetIn(rows, cam); const k = Math.max(.7, (1070 - b.y) / b.h); rows.style.transformOrigin = "0 0"; rows.style.zoom = k; }
+        if (rows && bottom() > 1150) { const b = offsetIn(rows, cam); const k = Math.max(.7, (1150 - b.y) / b.h); rows.style.transformOrigin = "0 0"; rows.style.zoom = k; }
         // shape the hand-drawn strokes from the laid-out text
         sc.querySelectorAll("path.pc").forEach((p, k) => { const t = sc.querySelector(p.dataset.target); if (t) p.setAttribute("d", ringPath(offsetIn(t, cam), 11 + k)); });
         sc.querySelectorAll("path[data-under]").forEach((p, k) => { const t = sc.querySelector(p.dataset.under); if (t) { const b = offsetIn(t, cam); p.setAttribute("d", linePath(b.x, b.x + Math.min(b.w, 760), b.y + b.h + 10, 3 + k)); } });
