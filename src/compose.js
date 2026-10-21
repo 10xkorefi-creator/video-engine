@@ -3,6 +3,7 @@ import path from "node:path";
 import { ROOT } from "./config.js";
 import { escapeHtml as esc } from "./util.js";
 import { sceneHtml, SCENE_CSS, SCENE_JS, isProductScene } from "./scenes.js";
+import { paperBlock, PAPER_CSS, PAPER_JS } from "./paper.js";
 
 const W = 1080;
 const H = 1920;
@@ -29,6 +30,7 @@ function shotHtml(s, i) {
   if (type === "footage" && s.asset.kind === "image") {
     return `<div ${common}><div class="kb"><img src="${s.asset.file}" alt=""></div><div class="shade"></div></div>`;
   }
+  if (s.paper) return `<div ${common}>${s.paper.html}</div>`;
   if (type === "scene") {
     return `<div ${common}>${sceneHtml(v, { brand: /AI\s*Accountant|AiA/i.test(s.beatText || "") })}</div>`;
   }
@@ -57,10 +59,12 @@ function audioHtml(tl, { bed }) {
   a.push(`<audio id="music" src="assets/audio/${bed}.mp3" data-start="0" data-duration="${f(tl.total)}" data-volume="0.16" data-fade-in="0.4" data-fade-out="1.2"></audio>`);
   tl.shots.forEach((s, i) => {
     if (i === 0) return;
-    const sfx = s.visual?.type === "stat" ? ["impact", 0.55, 1.0] : ["whoosh", 0.32, 0.45];
+    const sfx = ["whoosh", 0.32, 0.45];
     const st = Math.max(0, s.start - (sfx[0] === "whoosh" ? 0.18 : 0.02));
     a.push(`<audio id="sfx${i}" src="assets/audio/${sfx[0]}.mp3" data-start="${f(st)}" data-duration="${sfx[2]}" data-volume="${sfx[1]}"></audio>`);
   });
+  tl.shots.forEach((s, i) => (s.paper?.cues || []).forEach((c, k) =>
+    a.push(`<audio id="pen${i}_${k}" src="assets/audio/scribble.mp3" data-start="${f(c.t)}" data-duration="${f(Math.min(0.7, c.d + 0.08))}" data-volume="0.38"></audio>`)));
   if (tl.twistAt) {
     a.push(`<audio id="riser" src="assets/audio/riser.mp3" data-start="${f(Math.max(0, tl.twistAt - 1.6))}" data-duration="1.6" data-volume="0.4"></audio>`);
     a.push(`<audio id="hit" src="assets/audio/impact.mp3" data-start="${f(tl.twistAt)}" data-duration="1.0" data-volume="0.5"></audio>`);
@@ -70,8 +74,8 @@ function audioHtml(tl, { bed }) {
 
 function timelineJs(tl) {
   const shots = tl.shots.map((s, i) => ({
-    id: `shot${i}`, start: s.start, end: s.end, type: s.visual?.type, kind: s.asset?.kind, role: s.role, scene: s.visual?.scene,
-    brand: s.visual?.type !== "footage" && !(s.visual?.type === "scene" && isProductScene(s.visual?.scene)) && s.role !== "cta",
+    id: `shot${i}`, start: s.start, end: s.end, type: s.visual?.type, kind: s.asset?.kind, role: s.role, scene: s.visual?.scene, paper: !!s.paper,
+    brand: !s.paper && s.visual?.type !== "footage" && !(s.visual?.type === "scene" && isProductScene(s.visual?.scene)) && s.role !== "cta",
     tr: i === 0 ? "none" : TRANSITIONS[i % TRANSITIONS.length],
   }));
   const caps = tl.captions.map((c, i) => ({ id: `cap${i}`, words: c.words.map((w, j) => ({ id: `c${i}w${j}`, s: w.start, e: w.end })) }));
@@ -92,6 +96,7 @@ function timelineJs(tl) {
         tl.set(v, { textContent: v.dataset.count }, t + d + 0.06);
       }
 ${SCENE_JS}
+${PAPER_JS}
 
       tl.fromTo("#progress", { scaleX: 0 }, { scaleX: 1, duration: DATA.total, ease: "none" }, 0);
 
@@ -106,7 +111,9 @@ ${SCENE_JS}
         // motion on every scene
         // brand mark only on clean cards/explainer scenes, never over footage or product UI
         tl.set("#brand", { autoAlpha: s.brand ? 1 : 0 }, s.start);
-        if (s.type === "scene") {
+        if (s.paper) {
+          paperAnim(tl, document.querySelector(el), s.start, dur);
+        } else if (s.type === "scene") {
           tl.fromTo(el + " .sc", { scale: 1.0 }, { scale: 1.03, duration: dur, ease: "none" }, s.start);
           if (SCENES[s.scene]) SCENES[s.scene](tl, document.querySelector(el), s.start, dur);
         } else if (s.type === "footage") {
@@ -151,7 +158,7 @@ const CSS = `
       #stage { position: absolute; inset: 0; }
       .clip { position: absolute; inset: 0; }
       .shot { overflow: hidden; background: #000; }
-      .kb { position: absolute; inset: 0; will-change: transform; }${SCENE_CSS}
+      .kb { position: absolute; inset: 0; will-change: transform; }${SCENE_CSS}${PAPER_CSS}
       .kb video, .kb img { width: 100%; height: 100%; object-fit: cover; display: block; }
       .shade { position: absolute; inset: 0; background:
         linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 45%, rgba(0,0,0,.65) 75%, rgba(0,0,0,.8) 100%); }
@@ -191,6 +198,12 @@ export async function writeProject(projectDir, { timeline, title, bed }) {
   await mkdir(projectDir, { recursive: true });
   await cp(path.join(ROOT, "template", "assets"), path.join(projectDir, "assets"), { recursive: true });
   const tl = timeline;
+  // Numbers are explained on paper: every stat card and every paper_math scene.
+  for (const s of tl.shots) {
+    const v = s.visual || {};
+    if (v.type === "stat") s.paper = paperBlock("stat", { value: v.value, label: v.label }, s.start, s.end - s.start);
+    else if (v.type === "scene" && v.scene === "paper_math") s.paper = paperBlock("math", v.params, s.start, s.end - s.start);
+  }
   const html = `<!doctype html>
 <html lang="en">
   <head>

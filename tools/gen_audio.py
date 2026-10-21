@@ -84,6 +84,18 @@ def tick():
     return np.sin(2 * np.pi * 1800 * tt) * np.exp(-tt * 70) + 0.3 * rng.standard_normal(len(tt)) * np.exp(-tt * 200)
 
 
+def scribble():
+    """Marker on paper: band-passed noise in short pen strokes (own RNG, so other sounds stay identical)."""
+    r = np.random.default_rng(23)
+    d = 0.7
+    tt = t(d)
+    n = r.standard_normal(len(tt))
+    band = onepole_lp(n, 6500) - onepole_lp(n, 1400)
+    strokes = np.abs(np.sin(2 * np.pi * 8.5 * tt + 2.0 * np.sin(2 * np.pi * 1.7 * tt))) ** 1.6
+    env = np.clip(tt / 0.03, 0, 1) * np.clip((d - tt) / 0.12, 0, 1)
+    return band * strokes * env * 2.2
+
+
 # ---------- music beds ----------
 def note_hz(m):
     return 440.0 * 2 ** ((m - 69) / 12)
@@ -149,5 +161,6 @@ if __name__ == "__main__":
     write("impact", impact())
     write("riser", riser(), 0.5)
     write("tick", tick())
+    write("scribble", scribble(), 0.3)
     bed("bed_a", root=45, bpm=96, prog=[(0, 3, 7), (-4, 0, 3), (-9, -5, 0), (-2, 2, 5)])   # A minor, i-VI-III-VII
     bed("bed_b", root=50, bpm=104, prog=[(0, 3, 7), (0, 3, 8), (-2, 2, 5), (-5, -2, 2)])   # D minor, darker

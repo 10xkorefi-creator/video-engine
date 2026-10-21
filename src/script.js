@@ -79,12 +79,13 @@ FACTS (strict)
 - Competitors and alternatives (Tally's Docs by Ira, Suvit, Zoho Books, Excel imports, generic OCR) may be named only when the story is about choosing a tool, using ONLY the facts in CONTEXT section 6, fairly and without mockery, with the contrast naturally favouring AiA. Never make specific claims about VouchrIt.
 - Proof points (75%, 95% bills accuracy, 50+ banks, survey stats, 21-branch hotel) only exactly as written in CONTEXT section 4, and only when they serve the story.
 
-VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, offices, stress), animated scenes for EXPLAINING, stat cards for NUMBERS.
+VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, offices, stress), animated scenes for EXPLAINING, paper for NUMBERS (stat = one big figure hand-written and circled on paper; paper_math = the working of a figure written out line by line).
 - {"type":"footage","query":"2-3 word ENGLISH stock video search, concrete and filmable, human and everyday, never ambiguous words (say 'invoice paper' not 'bill') (e.g. 'indian shop owner', 'worried businessman phone', 'warehouse boxes', 'woman entrepreneur laptop'), no brand names"}
 - {"type":"stat","value":"the exact figure as it appears in this beat's text","label":"2-5 word plain-English label"}
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
 - {"type":"scene","scene":"<kind>","params":{...}} animated explainer/product scene. Kinds:
 ${Object.entries(SCENE_KINDS).map(([k, d]) => `  * ${k}: ${d}`).join("\n")}
+  NUMBERS ON PAPER: whenever a beat explains how a figure comes about (adds up, multiplies, is lost, is saved), use paper_math and show the working with real figures from this beat (2-4 rows, then the result); a single headline figure uses stat. Every figure on paper must appear in that beat's text (or be a clearly hypothetical "let's say" example). Use paper_math at most twice per reel.
   Product scenes (bills_flow, bank_match, gst_match, whatsapp) ONLY on the beat(s) where AI Accountant is mentioned. Explainer scenes (deadline, meter, split, flow) whenever a process, deadline, ticking cost or comparison is being explained. Scene params are short on-screen labels in Latin script; any figure in params must appear in that beat's text.
 Use 4-7 non-footage visuals (stat/text/scene) total, at least 2 of them scenes when the story explains something. Never two text cards in a row. A scene may stay on screen for up to 2 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
 
@@ -108,7 +109,7 @@ export function unsupportedNumbers(script, blogText) {
   const nums = new Set();
   for (const b of script.beats) {
     if (b.kind === "example") continue; // clearly-framed hypothetical amounts
-    for (const src of [stripTags(b.text), b.visual?.value || "", ...Object.values(b.visual?.params || {}).flat().map(String)]) {
+    for (const src of [stripTags(b.text), b.visual?.value || "", JSON.stringify(b.visual?.params || {})]) {
       for (const m of norm(src).matchAll(/\d+(?:\.\d+)?/g)) nums.add(m[0]);
     }
   }
@@ -129,6 +130,10 @@ export function validateShape(s) {
   if (beats[0]?.role !== "hook") errs.push("first beat must be hook");
   if (beats[0] && countWords(beats[0].text) > 8) errs.push("hook longer than 7 words");
   for (const b of beats) if (!b.visual?.type) errs.push(`beat without visual: ${b.text}`);
+  for (const b of beats) {
+    const p = b.visual?.scene === "paper_math" ? b.visual.params || {} : null;
+    if (p && (!Array.isArray(p.rows) || p.rows.length < 2 || !p.result?.value)) errs.push(`paper_math needs 2-4 rows of {label, value} and a result {label, value}: ${b.text}`);
+  }
   if (String(s.caption || "").length > 320) errs.push("caption too long: max 3 short lines, under 300 characters, starting with a hook line");
   if (/https?:\/\/|www\.|\.com\b/i.test(s.caption || "")) errs.push("caption must not contain any link or URL (the link goes in the first comment)");
   const onScreen = [s.title, s.caption, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
