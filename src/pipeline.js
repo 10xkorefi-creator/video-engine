@@ -14,7 +14,7 @@ import { Costs, StepError, log, probeDuration, run, slugify, step } from "./util
 
 const LEAD = 0.1;
 const TAIL = 0.9;
-const PAUSE = 0.35;
+const PAUSE = 0.25;
 
 /** Script + deterministic number guard + LLM fact check, with feedback-driven rewrites. */
 export async function scriptWithChecks(blog, angle, costs, opts = {}) {
@@ -107,6 +107,12 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
       const { audio, cost } = await step("tts", () => speak(text, { model: ttsModel, voice: ttsVoice }));
       costs.add("tts", cost);
       await writeFile(voicePath, audio);
+      // A touch faster than the raw read keeps Reels/Shorts pacing tight without sounding rushed.
+      if (config.voiceSpeed !== 1) {
+        const fast = path.join(projectDir, "voice_tempo.mp3");
+        await run("ffmpeg", ["-y", "-v", "error", "-i", voicePath, "-filter:a", `atempo=${config.voiceSpeed}`, fast]);
+        await rename(fast, voicePath);
+      }
       audioDur = await probeDuration(voicePath);
       const total = audioDur + LEAD + TAIL + PAUSE;
       log(`  voice ${audioDur.toFixed(1)}s -> reel ${total.toFixed(1)}s`);
@@ -143,8 +149,9 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
 
     const bed = angleKey === "B" ? "bed_b" : "bed_a";
     // Saved so visuals can be re-composed and re-rendered without new API calls (tools/recompose.mjs).
-    await writeFile(path.join(projectDir, "timeline.json"), JSON.stringify({ timeline, title: script.title, bed }));
-    await step("compose", () => writeProject(projectDir, { timeline, title: script.title, bed }), { retries: 0 });
+    const hookText = script.hook_text || "";
+    await writeFile(path.join(projectDir, "timeline.json"), JSON.stringify({ timeline, title: script.title, bed, hookText }));
+    await step("compose", () => writeProject(projectDir, { timeline, title: script.title, bed, hookText }), { retries: 0 });
 
     const mp4 = path.join(dir, `${jobId}.mp4`);
     const renderSeconds = await step("render", () => render(projectDir, mp4));
@@ -162,6 +169,8 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
       angle: angleKey,
       language: lang,
       title: script.title,
+      hook_text: script.hook_text || null,
+      hook_options: script.hook_options || [],
       script: scriptPlain(script),
       tts_input: scriptText(script),
       beats: script.beats.map((b) => ({ role: b.role, text: b.text, visual: b.visual })),

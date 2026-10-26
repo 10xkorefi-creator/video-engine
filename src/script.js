@@ -35,7 +35,7 @@ const LANG = {
 - Everything in Latin script, digits ASCII.
 - ENGLISH ONLY: every spoken word is English (Indian terms like lakh, crore, CA are fine). The Hindi phrases in the rules below only illustrate tone; write their English equivalent ("Let's say...", "Most founders get this wrong"). No Hindi words, no Devanagari.`,
     words: [110, 130],
-    beatWords: "8-22",
+    beatWords: "4-14",
   },
 };
 
@@ -61,14 +61,25 @@ STORY FIRST, RULES SECOND
 ${lang().voice}
 
 STRUCTURE (beats in this order): hook -> setup -> story -> twist -> takeaway -> cta.
-- hook: ONE beat, max 7 words, first sentence max 4 words, lands in under 2 seconds. A relatable shock, a myth, or a question every founder has asked. No greetings, no "did you know".
+- hook: ONE beat, max 9 words, the first 3 words already intriguing, spoken in under 2.5 seconds. It must open a CURIOSITY GAP that only the rest of the reel closes. Use one of these proven patterns:
+    * a sharp question the viewer can't answer yet ("Why does the taxman care when you pay your supplier?")
+    * a counter-intuitive claim ("Paying your supplier late can raise your tax.")
+    * a specific stake ("This one date can cost you ₹4.5 lakh in tax.")
+    * a direct callout ("If you buy from small suppliers, stop scrolling.")
+  Never start with context, a greeting, "did you know", "in this video" or the topic name. Before choosing, write 3 different hooks in "hook_options" and use the strongest one (most curiosity, clearest stake) as beat 1.
+- hook_text: a separate 3-7 word ON-SCREEN headline shown huge over the first shot. It complements (does not repeat) the spoken hook and states the stake or the question, e.g. "Late payment = more tax?" or "₹15 lakh, deduction gone". Latin script.
 - setup: the founder and situation in 1-2 beats.
 - story: 2-4 beats of what happens, with the stakes. This is where the one idea is EXPLAINED, slowly and clearly, usually on the paper canvas.
 - twist: the reveal that reframes everything.
 - takeaway: one simple, doable habit or quotable line (not tax advice beyond the blog).
 - cta: exactly one beat (text given above).
 
-PACING: 8-11 beats in total, each beat one clear sentence or two (8-22 spoken words). Fewer, longer beats beat many quick cuts: the viewer must have time to understand each picture.
+PACING (Instagram Reels / YouTube Shorts retention):
+- 12-16 short beats, each one punchy sentence (4-14 spoken words). Something new happens on screen every 2-3 seconds.
+- No warm-up: the second beat already moves the story. Cut filler words ("basically", "so what happens is", "you see").
+- Re-hook every 10-15 seconds with an open loop ("But that's not the worst part.", "Here's where it gets expensive.", "Now watch what happens on 1 June.").
+- The payoff of the hook's question lands in the second half (the twist), not earlier, so people stay.
+- End fast: takeaway in one line, then the CTA. No recap.
 
 FACTS (strict)
 - Every real-world claim (rate, penalty, deadline, rule, statistic, real case) must come from the BLOG POST or the RESEARCH NOTES. Never invent real cases, company names, statistics or rules. Prefer research notes when newer.
@@ -76,7 +87,7 @@ FACTS (strict)
 - When you simplify, keep the meaning EXACT: interest stays interest (not penalty), "per year" or "per month" stays, a deadline stays the same kind of deadline. Big-picture stakes ("लाखों", "हज़ारों का नुकसान") are fine when the sources make them plausible for a typical SMB; never put an exact made-up amount on them.
 - Real figures: digits exactly as in the source ("Rs 50 lakh" -> "₹50 lakh"). Never spell numbers as words.
 - Read aloud by a voice engine: no parentheses, slashes or abbreviations.
-- LENGTH: default is a 45-60 second reel: ${lang().words[0]}-${lang().words[1]} spoken words, 8-11 beats. Prefer this. ONLY if the story or the explanation genuinely cannot land in 60 seconds, you may go long (up to 3 minutes, max 400 words, up to 30 beats); then set "length":"long" and give a one-line "length_reason". Never pad. Each beat ${lang().beatWords} words, one idea, short sentences.
+- LENGTH: default is a 45-60 second reel: ${lang().words[0]}-${lang().words[1]} spoken words, 12-16 beats. Prefer this. ONLY if the story or the explanation genuinely cannot land in 60 seconds, you may go long (up to 3 minutes, max 400 words, up to 40 beats); then set "length":"long" and give a one-line "length_reason". Never pad. Each beat ${lang().beatWords} words, one idea, short sentences.
 - The takeaway must agree with the blog's recommendations.
 - BRAND (see AiA CONTEXT): the reel's job is fun, engaging storytelling about a mundane accounting topic, not selling. Whenever the story shows a problem AiA directly solves (CONTEXT sections 2-3: typing bills by hand, messy/handwritten bills, bank statement entry, GSTR-2B matching, accountant churn/backlog, no real-time numbers, duplicate bills, choosing or switching software), you SHOULD weave AI Accountant in ONCE, inside the story, as the smart founder's move, with one concrete thing it does, describing it as working on top of Tally, never as accounting software. If the problem is a deadline, a rule or a registration, do NOT mention AiA (the CTA already does). No generic tag-on lines, no "best"/"number one", no pricing, no unlaunched features.
 - Competitors and alternatives (Tally's Docs by Ira, Suvit, Zoho Books, Excel imports, generic OCR) may be named only when the story is about choosing a tool, using ONLY the facts in CONTEXT section 6, fairly and without mockery, with the contrast naturally favouring AiA. Never make specific claims about VouchrIt.
@@ -88,14 +99,16 @@ VISUAL per beat (one of). Mix: stock footage for HUMAN moments (people, shops, o
 - {"type":"text","value":"2-5 word punchline shown huge on screen, plain words"}
 - {"type":"scene","scene":"<kind>","params":{...}} animated explainer/product scene. Kinds:
 ${Object.entries(SCENE_KINDS).map(([k, d]) => `  * ${k}: ${d}`).join("\n")}
-  THE CANVAS (most important): the explanation of the one idea happens on ONE paper canvas (paper_math) that stays on screen for 2-4 consecutive beats while the voice walks through it, like a teacher writing on paper. Each line is written at the moment the voice says it, so the order of rows must match the order they are spoken, and every row value must be said aloud in those beats exactly as written on the paper. Put the SAME paper_math object on each of those consecutive beats (it is drawn once and fills in as you speak). If the story has a worked example with amounts or dates ("let's say ₹15 lakh...", interest, a penalty, credit lost, hours saved), it MUST be on the canvas. Use one canvas per reel (two only if truly needed). A single headline figure outside the canvas uses stat. Every figure on paper must appear in the spoken text (or be a clearly hypothetical "let's say" example).
+  THE CANVAS (most important): the explanation of the one idea happens on ONE paper canvas (paper_math) that stays on screen for 2-3 consecutive beats (about 6-10 seconds) while the voice walks through it, like a teacher writing on paper. Each line is written at the moment the voice says it, so the order of rows must match the order they are spoken, and every row value must be said aloud in those beats exactly as written on the paper. Put the SAME paper_math object on each of those consecutive beats (it is drawn once and fills in as you speak). If the story has a worked example with amounts or dates ("let's say ₹15 lakh...", interest, a penalty, credit lost, hours saved), it MUST be on the canvas. Use one canvas per reel (two only if truly needed). A single headline figure outside the canvas uses stat. Every figure on paper must appear in the spoken text (or be a clearly hypothetical "let's say" example).
   Product scenes (bills_flow, bank_match, gst_match, whatsapp) ONLY on the beat(s) where AI Accountant is mentioned. Explainer scenes (deadline, meter, split, flow) whenever a process, deadline, ticking cost or comparison is being explained. Scene params are short on-screen labels in Latin script; any figure in params must appear in that beat's text.
-Keep the visuals calm: about 5-7 distinct visuals in the whole reel. Footage for the hook and the human moments only, the canvas for the explanation, at most one other scene and at most one text card. Never two text cards in a row. A scene may stay on screen for up to 4 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
+Visual rhythm: footage for the hook and human moments (it is cut every ~2.5 seconds automatically), the canvas for the explanation, plus 1-2 other scenes or stat/text punches. Never two text cards in a row. A scene may stay on screen for up to 3 beats (repeat the same visual object). The cta beat uses {"type":"text","value":"aiaccountant.com"}.
 
 Also return "keywords" per beat: 0-3 words copied exactly from that beat's text to highlight in captions (numbers, the key noun).
 
 Return ONLY JSON:
 {"length":"short|long","length_reason":"only if long",
+ "hook_options":["3 different hooks, strongest first"],
+ "hook_text":"3-7 word on-screen headline for the first shot",
  "title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
  "beats":[{"role":"hook|setup|story|twist|takeaway|cta","kind":"fact|example","text":"spoken words","visual":{...},"keywords":["..."]}],
  "caption":"Post caption, max 3 short lines (under 300 characters). Line 1 is a scroll-stopping hook for readers (max 12 words: a surprising stake, a sharp question or a bold claim the reel backs up; not a copy of the spoken hook, no 'Did you know', no emoji spam). Line 2 is the one-line payoff or takeaway. Optional line 3: a short nudge to read the link in the first comment. NO URLs or links in the caption (the link goes in the first comment)",
@@ -116,6 +129,7 @@ export function unsupportedNumbers(script, blogText) {
       for (const m of norm(src).matchAll(/\d+(?:\.\d+)?/g)) nums.add(m[0]);
     }
   }
+  for (const m of norm(script.hook_text || "").matchAll(/\d+(?:\.\d+)?/g)) nums.add(m[0]); // on-screen headline too
   return [...nums].filter((n) => !new RegExp(`(^|[^\\d.])${n.replace(".", "\\.")}([^\\d]|$)`).test(blog));
 }
 
@@ -125,13 +139,14 @@ export function validateShape(s) {
   const beats = s.beats || [];
   const [lo, hi] = lang().words;
   const long = s.length === "long";
-  if (beats.length < 7 || beats.length > (long ? 30 : 13)) errs.push(`beat count ${beats.length} (want ${long ? "up to 30" : "8-11"})`);
+  if (beats.length < 10 || beats.length > (long ? 40 : 18)) errs.push(`beat count ${beats.length} (want ${long ? "up to 40" : "12-16"})`);
   const words = beats.reduce((n, b) => n + countWords(b.text), 0);
   const max = long ? 420 : hi + 50; // real length is enforced on measured voice duration
   if (words > max) errs.push(`Too long: ${words} spoken words. Cut about ${words - (long ? 400 : hi)} words: drop or merge beats, shorten sentences.${long ? "" : ` Or, only if the story truly needs it, mark "length":"long".`}`);
   if (words < lo - 20) errs.push(`Too short: ${words} spoken words. Add about ${lo - words} words of story. Target ${lo}-${hi}.`);
   if (beats[0]?.role !== "hook") errs.push("first beat must be hook");
-  if (beats[0] && countWords(beats[0].text) > 8) errs.push("hook longer than 7 words");
+  if (beats[0] && countWords(beats[0].text) > 10) errs.push("hook longer than 9 words");
+  if (!s.hook_text || countWords(s.hook_text) > 8) errs.push("hook_text missing or longer than 7 words");
   for (const b of beats) if (!b.visual?.type) errs.push(`beat without visual: ${b.text}`);
   for (const b of beats) {
     const p = b.visual?.scene === "paper_math" ? b.visual.params || {} : null;
@@ -149,7 +164,7 @@ export function validateShape(s) {
   if (worked && !beats.some((b) => b.visual?.scene === "paper_math")) errs.push(`Show the worked example on paper: give the beat "${stripTags(worked.text).slice(0, 80)}" a paper_math scene with its figures as rows and the outcome as the result.`);
   if (String(s.caption || "").length > 320) errs.push("caption too long: max 3 short lines, under 300 characters, starting with a hook line");
   if (/https?:\/\/|www\.|\.com\b/i.test(s.caption || "")) errs.push("caption must not contain any link or URL (the link goes in the first comment)");
-  const onScreen = [s.title, s.caption, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
+  const onScreen = [s.title, s.caption, s.hook_text, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
   if (currentLanguage === "english" && beats.some((b) => /[ऀ-ॿ]/.test(b.text))) errs.push("This is an ENGLISH reel: rewrite every beat in English only, no Hindi or Devanagari.");
   if (/[ऀ-ॿ]/.test(onScreen)) errs.push("on-screen text, title and caption must use Latin script only");
   return { errs, words };

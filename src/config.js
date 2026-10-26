@@ -24,6 +24,7 @@ export const config = {
   // egress proxy that injects credentials (cloud sandbox). On a normal server set them.
   openrouterKey: env("OPENROUTER_API_KEY", ""),
   pixabayKey: env("PIXABAY_API_KEY", ""),
+  pexelsKey: env("PEXELS_API_KEY", ""), // optional second stock library
   supabaseUrl: env("SUPABASE_URL", "https://qmaphtslnvvifkzmbrvh.supabase.co").replace(/\/$/, ""),
   supabaseKey: env("SUPABASE_SERVICE_KEY", ""),
   supabaseBucket: env("SUPABASE_BUCKET", "reels"),
@@ -39,6 +40,7 @@ export const config = {
   // English reels use their own voice; empty falls back to TTS_MODEL / TTS_VOICE.
   ttsModelEn: env("TTS_MODEL_EN", ""),
   ttsVoiceEn: env("TTS_VOICE_EN", "RpiHVNPKGBg7UmgmrKrN"), // Aashish (Indian English)
+  voiceSpeed: Number(env("VOICE_SPEED", "1.07")), // 1 = raw TTS pace
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
 
   minSeconds: Number(env("MIN_SECONDS", 40)),

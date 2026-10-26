@@ -9,7 +9,7 @@ const W = 1080;
 const H = 1920;
 const f = (n) => Number(n).toFixed(3);
 
-const TRANSITIONS = ["whip", "fade", "whipUp", "fade"];
+const TRANSITIONS = ["whip", "punch", "whipUp", "punch", "flash"];
 
 /** Largest font size (px) at which `text` fits `width` on one line (approx. glyph width ratio). */
 const fitSize = (text, max, width, ratio) => Math.floor(Math.min(max, width / (Math.max(1, String(text).length) * ratio)));
@@ -72,7 +72,10 @@ function audioHtml(tl, { bed }) {
   return a.join("\n      ");
 }
 
-function timelineJs(tl) {
+/** The on-screen hook headline stays for the opening shot (2.2-3.5s). */
+const hookDur = (tl) => Math.max(2.2, Math.min(tl.shots[0]?.end || 3, 3.5));
+
+function timelineJs(tl, hasHook) {
   const shots = tl.shots.map((s, i) => ({
     id: `shot${i}`, start: s.start, end: s.end, type: s.visual?.type, kind: s.asset?.kind, role: s.role, scene: s.visual?.scene, paper: !!s.paper,
     brand: !s.paper && s.visual?.type !== "footage" && !(s.visual?.type === "scene" && isProductScene(s.visual?.scene)) && s.role !== "cta",
@@ -106,7 +109,7 @@ ${PAPER_JS}
         // entrance transition
         if (s.tr === "whip") tl.fromTo(el, { xPercent: i % 2 ? -100 : 100 }, { xPercent: 0, duration: 0.24, ease: "expo.out" }, s.start);
         else if (s.tr === "whipUp") tl.fromTo(el, { yPercent: 100 }, { yPercent: 0, duration: 0.26, ease: "expo.out" }, s.start);
-        else if (s.tr === "punch") tl.fromTo(el, { scale: 1.12, opacity: 0.4 }, { scale: 1, opacity: 1, duration: 0.35, ease: "power3.out" }, s.start);
+        else if (s.tr === "punch") tl.fromTo(el, { scale: 1.3, opacity: 0.25 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power3.out" }, s.start);
         else if (s.tr === "fade") tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, s.start);
         else if (s.tr === "flash") tl.fromTo("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.25, ease: "power1.out", immediateRender: false }, s.start);
         // motion on every scene
@@ -138,6 +141,13 @@ ${PAPER_JS}
           tl.to("#" + w.id, { scale: 1.08, duration: 0.08, ease: "power1.out", yoyo: true, repeat: 1 }, w.s + 0.14);
         });
       });
+
+      // hook headline: slams in on frame 1, holds, then gets out of the way
+      if (${hasHook}) {
+        tl.fromTo("#hook .hook-box", { scale: 1.6, opacity: 0, rotation: -4 }, { scale: 1, opacity: 1, rotation: -2, duration: 0.28, ease: "back.out(2.2)" }, 0.02);
+        tl.to("#hook .hook-box", { scale: 1.04, duration: 0.12, yoyo: true, repeat: 1, ease: "power1.out" }, 0.9);
+        tl.to("#hook .hook-box", { opacity: 0, y: -40, duration: 0.2, ease: "power2.in" }, ${(hookDur(tl) - 0.22).toFixed(3)});
+      }
 
       // shake on the twist
       if (DATA.twistAt) {
@@ -192,10 +202,13 @@ const CSS = `
         font-family: "Text"; font-size: 34px; color: #fff; letter-spacing: .02em; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
       #brand img { width: 46px; height: 46px; }
       #progress { position: absolute; z-index: 600; top: 0; left: 0; width: 100%; height: 12px; background: var(--hot); transform-origin: 0 50%; }
+      #hook { position: absolute; inset: 0; z-index: 550; pointer-events: none; display: flex; justify-content: center; align-items: flex-start; padding: 250px 60px 0; }
+      .hook-box { font-weight: 900; line-height: 1.02; letter-spacing: -0.04em; color: #0b0d14; background: var(--hot); padding: 26px 34px 30px; border-radius: 18px;
+        text-align: center; text-transform: uppercase; text-wrap: balance; box-shadow: 0 24px 60px rgba(0,0,0,.45); max-width: 960px; }
       #flash { position: absolute; inset: 0; z-index: 700; background: #fff; opacity: 0; pointer-events: none; }`;
 
 /** Write a self-contained HyperFrames project for one reel. */
-export async function writeProject(projectDir, { timeline, title, bed }) {
+export async function writeProject(projectDir, { timeline, title, bed, hookText = "" }) {
   await mkdir(projectDir, { recursive: true });
   await cp(path.join(ROOT, "template", "assets"), path.join(projectDir, "assets"), { recursive: true });
   const tl = timeline;
@@ -226,11 +239,12 @@ export async function writeProject(projectDir, { timeline, title, bed }) {
       <div id="captions" class="clip" data-layout-allow-overlap data-start="0" data-duration="${f(tl.total)}">
         ${tl.captions.map(captionHtml).join("\n        ")}
       </div>
+      ${hookText ? `<div id="hook" class="clip" data-start="0" data-duration="${f(hookDur(tl))}"><div class="hook-box" style="font-size:${fitWords(hookText) * 0.85 | 0}px">${esc(hookText)}</div></div>` : ""}
       <div id="brand" class="clip" data-start="0" data-duration="${f(tl.total)}"><img src="assets/ai-accountant-a-star-white.svg" alt="">AI Accountant</div>
       <div id="progress" class="clip" data-start="0" data-duration="${f(tl.total)}"></div>
       <div id="flash" class="clip" data-start="0" data-duration="${f(tl.total)}"></div>
     </div>
-    <script>${timelineJs(tl)}
+    <script>${timelineJs(tl, !!hookText)}
     </script>
   </body>
 </html>

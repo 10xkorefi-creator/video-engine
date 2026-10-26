@@ -214,6 +214,9 @@ export const PAPER_JS = `
           tl.fromTo(p, { strokeDashoffset: L + 20 }, { strokeDashoffset: 0, duration: D(p), ease: "power1.inOut", immediateRender: true }, T(p));
         });
         sc.querySelectorAll(".ph[data-t]").forEach((h) => tl.fromTo(h, { scaleX: 0 }, { scaleX: 1, duration: D(h), ease: "power2.out", immediateRender: true }, T(h)));
+        // pattern interrupt: a quick push-in every time a new figure is written, so the sheet never sits still
+        sc.querySelectorAll(".pp-v[data-t], .pp-stat .pp-val[data-t]").forEach((v) =>
+          tl.fromTo(sc, { scale: 1.06 }, { scale: 1, duration: .4, ease: "power3.out", immediateRender: false }, T(v)));
         // the answer gets a small ink "pop" when it lands
         const ring = sc.querySelector("path.pc[data-t]");
         const focus = sc.querySelector(sc.dataset.focus);

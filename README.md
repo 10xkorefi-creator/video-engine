@@ -90,4 +90,6 @@ Sizing: about 3 minutes of render per reel with `REEL_CPUS=4` (default; a KVM 8 
 See `.env.example`. Useful switches:
 - `LANGUAGE=english`
 - `TTS_VOICE=<voice-library id>` (Hinglish); `TTS_VOICE_EN` / `TTS_MODEL_EN` override it for English reels
+- `PEXELS_API_KEY` (optional, free at pexels.com/api) adds a second stock library; clips/photos are not reused across reels for 21 days
+- `VOICE_SPEED=1.07` voice tempo (1 = raw TTS pace)
 - `RESEARCH_RESULTS=0` turns web research off, so scripts come from the blog only.
