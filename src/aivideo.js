@@ -84,6 +84,9 @@ export async function aiBroll(script, shots, projectDir) {
     const line = stripTags(s.beatText);
     const need = s.end - s.start + 0.6;
     const len = need <= 3.9 ? 4 : need <= 5.9 ? 6 : 8; // Veo clip lengths
+    // Keep the best attempt: AI clips keep the cast consistent, so a decent one beats any stock clip.
+    // Regenerate only when a clip is clearly wrong (<5); give up to stock only if both attempts are bad (<4).
+    let best = null;
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const clip = await cachedClip(prompt, raw, len);
@@ -91,18 +94,18 @@ export async function aiBroll(script, shots, projectDir) {
         const q = await qa(clip.file, line, prompt);
         cost += q.cost;
         log(`  ai shot${s.idx} try${attempt + 1}: QA ${q.score}/10`);
-        if (q.score >= 6) {
-          await prepClip(clip.file, path.join(mediaDir, `shot${s.idx}.mp4`), Math.min(need, len - 0.05), Math.max(0, Math.min(0.3, len - 0.05 - need)));
-          shots[s.idx].asset = { kind: "video", file: `media/shot${s.idx}.mp4` };
-          shots[s.idx].aiPrompt = prompt;
-          return true;
-        }
-        prompt = `${prompt.replace(/ Photorealistic, natural colours.*$/, "")} Keep any paper or screen blurred and out of focus. Photorealistic, natural colours, no text, no captions, no logos, no watermark.`;
+        if (!best || q.score > best.score) best = { ...clip, score: q.score, prompt };
+        if (q.score >= 5) break;
+        prompt = `${prompt.replace(/ Photorealistic, natural colours.*$/, "")} Keep any paper or screen blurred and out of focus; show the person's face and action clearly. Photorealistic, natural colours, no text, no captions, no logos, no watermark.`;
       } catch (e) {
         log(`  ai shot${s.idx} failed: ${e.message}`);
       }
     }
-    return false;
+    if (!best || best.score < 4) return false;
+    await prepClip(best.file, path.join(mediaDir, `shot${s.idx}.mp4`), Math.min(need, len - 0.05), Math.max(0, Math.min(0.3, len - 0.05 - need)));
+    shots[s.idx].asset = { kind: "video", file: `media/shot${s.idx}.mp4` };
+    shots[s.idx].aiPrompt = best.prompt;
+    return true;
   }));
   const made = results.filter(Boolean).length;
   return { cost, made, failed: foot.length - made, cast: d.cast };

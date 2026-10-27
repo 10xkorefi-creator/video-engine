@@ -30,7 +30,11 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
     const bad = unsupportedNumbers(script, sourcesText(blog, opts.research?.notes || []) + "\n" + PRODUCT);
     if (bad.length) errs.push(`These numbers do not appear in the blog post, remove or correct them: ${bad.join(", ")}`);
     // Word count is only a proxy: if length is the last problem left, let the measured voice decide (TTS loop trims).
-    const hard = errs.filter((e) => !e.startsWith("Too long") && !e.startsWith("Show the worked example") && !e.startsWith("Too many ideas"));
+    // Topics AI Accountant directly solves must stay on that problem and show AiA as the fix.
+    if (blog.aiaFit === "direct" && !script.beats?.some((b) => b.role !== "cta" && /AI\s*Accountant/i.test(b.text || ""))) {
+      errs.push(`Stay on this topic's problem (${blog.title}) and, inside the story, show AI Accountant as the smart founder's fix with one concrete thing it does (on top of Tally). Do not drift to a different rule or penalty.`);
+    }
+    const hard = errs.filter((e) => !e.startsWith("Too long") && !e.startsWith("Show the worked example") && !e.startsWith("Too many ideas") && !e.startsWith("Stay on this topic"));
     if (hard.length || (errs.length && attempt < 3)) { feedback = errs.join("\n"); lastIssues = errs; continue; }
     const [fc, pc] = await Promise.all([factCheck(blog, script, opts.research?.notes || []), plainCheck(script)]);
     costs.add("fact_check_llm", fc.cost + pc.cost);
@@ -55,10 +59,10 @@ export async function sourceFor(topic, blogUrl) {
   if (topic.related_blog) {
     try {
       const b = await fetchBlog(topic.related_blog);
-      return { ...b, title: topic.title, text: `${brief}\n\nRELATED AI ACCOUNTANT BLOG (${b.title}):\n${b.text}` };
+      return { ...b, title: topic.title, aiaFit: topic.aia_fit, text: `${brief}\n\nRELATED AI ACCOUNTANT BLOG (${b.title}):\n${b.text}` };
     } catch {}
   }
-  return { url: topic.related_blog || "https://www.aiaccountant.com", title: topic.title, text: brief };
+  return { url: topic.related_blog || "https://www.aiaccountant.com", title: topic.title, aiaFit: topic.aia_fit, text: brief };
 }
 
 export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voice, outDir, language }) {
