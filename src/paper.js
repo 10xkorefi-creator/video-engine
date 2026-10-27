@@ -45,10 +45,13 @@ const attr = (e, start) => `data-t="${(start + e.t).toFixed(3)}" data-d="${e.d.t
 function statBlock({ value = "", label = "" }, start, dur, words = []) {
   const ev = [];
   const said = spokenAt(value, words, start, 0);
-  ev.push({ id: "val", t: said != null ? Math.max(0.15, said - 0.1) : 0.2, d: writeDur(value) + 0.1, sfx: true });
-  ev.push({ id: "ring", t: ev[0].t + ev[0].d + 0.05, d: 0.5 });
-  ev.push({ id: "hl", t: ev[1].t + 0.25, d: 0.35 });
-  ev.push({ id: "lab", t: ev[1].t + 0.3, d: writeDur(label) });
+  const tv = said != null ? Math.max(0.15, said - 0.1) : 0.2;
+  // never leave a blank sheet: if the figure is spoken late, write the label first as context
+  const labelFirst = tv > 0.9 && label;
+  ev.push({ id: "val", t: tv, d: writeDur(value) + 0.1, sfx: true });
+  ev.push({ id: "ring", t: tv + writeDur(value) + 0.15, d: 0.5 });
+  ev.push({ id: "lab", t: labelFirst ? 0.15 : tv + writeDur(value) + 0.45, d: writeDur(label) });
+  ev.push({ id: "hl", t: labelFirst ? 0.15 + writeDur(label) * 0.6 : tv + writeDur(value) + 0.4, d: 0.35 });
   const s = Object.fromEntries(schedule(ev, dur).map((e) => [e.id, e]));
   const size = fit(value, 250, 860, 0.5);
   const html = `<div class="sc ppr" data-paper="stat" data-focus=".pp-val">

@@ -218,6 +218,8 @@ export async function writeProject(projectDir, { timeline, title, bed, hookText 
     // ink follows the voice: each figure is written when it is spoken
     const words = tl.captions.flatMap((c) => c.words).filter((w) => w.start >= s.start - 0.05 && w.start < s.end);
     if (v.type === "stat") s.paper = paperBlock("stat", { value: v.value, label: v.label }, s.start, s.end - s.start, words);
+    // a ticking-cost meter is a number too: write it on paper ("₹50" + "per day late fee")
+    else if (v.type === "scene" && v.scene === "meter") s.paper = paperBlock("stat", { value: v.params?.value, label: [v.params?.label, v.params?.unit].filter(Boolean).join(" · ") }, s.start, s.end - s.start, words);
     else if (v.type === "scene" && v.scene === "paper_math") s.paper = paperBlock("math", v.params, s.start, s.end - s.start, words);
   }
   const html = `<!doctype html>
