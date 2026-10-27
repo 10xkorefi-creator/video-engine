@@ -60,7 +60,10 @@ async function pexels(query, need) {
   const headers = { Authorization: config.pexelsKey };
   const q = encodeURIComponent(query);
   const [v, p] = await Promise.all([
-    http(`https://api.pexels.com/videos/search?query=${q}&orientation=portrait&per_page=30`, { headers }).then((r) => r.json()).catch(() => ({})),
+    // /v1/videos is the current path; the older /videos path is kept as a fallback
+    http(`https://api.pexels.com/v1/videos/search?query=${q}&orientation=portrait&per_page=30`, { headers }).then((r) => r.json())
+      .catch(() => http(`https://api.pexels.com/videos/search?query=${q}&orientation=portrait&per_page=30`, { headers }).then((r) => r.json()))
+      .catch(() => ({})),
     http(`https://api.pexels.com/v1/search?query=${q}&orientation=portrait&per_page=20`, { headers }).then((r) => r.json()).catch(() => ({})),
   ]);
   const vids = (v.videos || []).filter((x) => x.duration >= Math.min(need, 6)).flatMap((x) => {
