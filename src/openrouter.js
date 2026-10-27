@@ -78,3 +78,26 @@ export async function transcribe(file, { model = config.sttModel } = {}) {
   if (!d.words?.length) throw new Error("transcription returned no word timings");
   return { words: d.words.map((w) => ({ text: w.word, start: w.start, end: w.end })), text: d.text, cost: d.usage?.cost ?? 0 };
 }
+
+/** Text-to-video (async job): submit, poll until done, download. Returns { video: Buffer, cost }. */
+export async function generateVideo({ model, prompt, duration = 4, resolution = "1080p", aspectRatio = "9:16", timeoutMs = 480_000 }) {
+  const res = await http(`${BASE}/videos`, {
+    method: "POST",
+    headers: headers({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ model, prompt, duration, resolution, aspect_ratio: aspectRatio, generate_audio: false }),
+  }, 60_000);
+  const job = await res.json();
+  if (!job.id) throw new Error(`video job not created: ${JSON.stringify(job).slice(0, 200)}`);
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeoutMs) {
+    await new Promise((r) => setTimeout(r, 8000));
+    const s = await (await http(`${BASE}/videos/${job.id}`, { headers: headers() }, 30_000)).json();
+    if (/fail|error|cancel/i.test(s.status || "")) throw new Error(`video job ${s.status}: ${JSON.stringify(s.error || s).slice(0, 200)}`);
+    if (s.status === "completed") {
+      const url = s.unsigned_urls?.[0] || `${BASE}/videos/${job.id}/content?index=0`;
+      const v = await http(url, { headers: headers() }, 120_000);
+      return { video: Buffer.from(await v.arrayBuffer()), cost: s.usage?.cost ?? 0 };
+    }
+  }
+  throw new Error(`video job timed out after ${Math.round(timeoutMs / 1000)}s`);
+}

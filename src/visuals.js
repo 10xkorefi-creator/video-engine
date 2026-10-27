@@ -89,7 +89,7 @@ async function saveHistory(h) {
 }
 
 /** Trim + crop + scale a clip to an exact 1080x1920 30fps silent segment, from a varied start point. */
-async function prepClip(src, dest, seconds, offset) {
+export async function prepClip(src, dest, seconds, offset) {
   if (existsSync(dest)) return dest;
   const tmp = dest.replace(/\.mp4$/, ".part.mp4");
   await run("ffmpeg", [
@@ -108,7 +108,7 @@ const BAD_TAGS = /\b(cartoon|doodle|animation|animated|illustration|drawing|sket
  * Vision check: show the candidates' thumbnails next to the spoken line and score each 0-10.
  * Returns { scores, better } where better is a fresh 2-3 word search if nothing fits.
  */
-async function judge(line, query, cands) {
+export async function judge(line, query, cands) {
   const { json, cost } = await chatJSON({
     model: config.checkModel, temperature: 0, maxTokens: 1500,
     system: `You pick B-roll for a vertical explainer reel for Indian small-business founders. You get the line the narrator says while the clip plays, and numbered thumbnails.
@@ -155,7 +155,7 @@ export async function resolveVisuals(shots, projectDir, { seed = Date.now() % 99
   let cost = 0;
 
   for (const [i, shot] of shots.entries()) {
-    if (shot.visual?.type !== "footage") continue;
+    if (shot.visual?.type !== "footage" || shot.asset) continue; // AI-generated shots are already filled
     const line = String(shot.beatText || "").replace(/\[[^\]]*\]\s*/g, "");
     const need = shot.end - shot.start + 0.6;
     let query = shot.visual.query || "business office";

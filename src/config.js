@@ -41,6 +41,9 @@ export const config = {
   ttsModelEn: env("TTS_MODEL_EN", ""),
   ttsVoiceEn: env("TTS_VOICE_EN", "RpiHVNPKGBg7UmgmrKrN"), // Aashish (Indian English)
   voiceSpeed: Number(env("VOICE_SPEED", "1.07")), // 1 = raw TTS pace
+  // AI B-roll (OpenRouter video). Empty AI_VIDEO_MODEL = stock footage only.
+  aiVideoModel: env("AI_VIDEO_MODEL", "google/veo-3.1-lite"),
+  aiVideoResolution: env("AI_VIDEO_RESOLUTION", "1080p"),
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
 
   minSeconds: Number(env("MIN_SECONDS", 40)),

@@ -7,6 +7,7 @@ import { PRODUCT, stripTags, setLanguage, writeScript, factCheck, plainCheck, un
 import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
+import { aiBroll } from "./aivideo.js";
 import { writeProject } from "./compose.js";
 import { render, verify } from "./render.js";
 import { uploadVideo, saveJob } from "./storage.js";
@@ -144,6 +145,17 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
     const capWords = roman.words ? stt.words.map((w, i) => ({ ...w, cap: roman.words[i] })) : stt.words;
     const timeline = buildTimeline(script, capWords, { audioDuration: audioDur, lead: LEAD, tail: TAIL, pause: PAUSE });
 
+    // AI B-roll first (best fit to the script); any shot it can't fill falls back to stock below.
+    let ai = { made: 0, failed: 0, cast: {} };
+    if (config.aiVideoModel) {
+      try {
+        ai = await step("ai_video", () => aiBroll(script, timeline.shots, projectDir), { retries: 0 });
+        costs.add("ai_video", ai.cost);
+        log(`  ai b-roll: ${ai.made} made, ${ai.failed} fell back to stock`);
+      } catch (e) {
+        log(`  ai b-roll skipped: ${e.message}`);
+      }
+    }
     const { credits, cost: visualCost } = await step("assets", () => resolveVisuals(timeline.shots, projectDir));
     costs.add("visual_check_llm", visualCost);
 
@@ -189,6 +201,7 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
       total_seconds: Math.round((Date.now() - t0) / 1000),
       cost_usd: costs.toJSON(),
       media_credits: credits,
+      ai_broll: { model: config.aiVideoModel || null, made: ai.made, fell_back: ai.failed, cast: ai.cast },
       keyword: research.keyword,
       research_sources: [...new Set(research.notes.map((n) => n.source_url))],
       blog_conflicts: research.conflicts,
