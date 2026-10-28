@@ -74,7 +74,7 @@ STRUCTURE (beats in this order): hook -> setup -> story -> twist -> takeaway -> 
 - setup: the situation in 1-2 beats, with our recurring characters where they fit: Rohan (the founder), Sharma ji (the veteran accountant), Priya (the young CA). Use their names; it makes the channel feel like a series.
 - story: 2-4 beats of what happens, with the stakes. This is where the one idea is EXPLAINED, slowly and clearly, usually on the paper canvas. Real customer reactions from AiA CONTEXT section 9 make great story beats ("a founder told us he audits 350 entries a day").
 - twist: the BRIDGE. One short rhetorical question or reframe that flips the problem (it is shown with a freeze-frame and a record scratch). "So my accountant has to be a handwriting expert now?" / "So you're paying tax on money you never saved?" The answer comes right after.
-- takeaway: the payoff the PROMISE pointed to: one simple, doable habit or the fix (AI Accountant when the topic is something it directly solves). Then optionally one light comic tag line (max 6 words, English, warm and human) like "Sharma ji approves." or "Chai's on Rohan." before the CTA.
+- takeaway: the payoff the PROMISE pointed to: one simple, doable habit or the fix (AI Accountant when the topic is something it directly solves). Then optionally one light comic tag line (max 6 words, English, warm and human) before the CTA. Write a FRESH one that fits this story (a callback to the hook or a character's reaction), never a stock phrase like "Sharma ji approves."
 - cta: exactly one beat (text given above).
 
 PACING (Instagram Reels / YouTube Shorts retention; our winning ad was "short and crisp, fast cuts, on-point information"):

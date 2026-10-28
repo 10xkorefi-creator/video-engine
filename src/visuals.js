@@ -89,12 +89,23 @@ async function saveHistory(h) {
 }
 
 /** Trim + crop + scale a clip to an exact 1080x1920 30fps silent segment, from a varied start point. */
-export async function prepClip(src, dest, seconds, offset) {
+/**
+ * Trim, scale and grade a clip to 1080x1920. speed < 1 plays it in slight slow motion (stretches a
+ * short AI clip over a longer line); zoom > 1 punches in (a second "angle" from the same clip).
+ */
+export async function prepClip(src, dest, seconds, offset, { speed = 1, zoom = 1 } = {}) {
   if (existsSync(dest)) return dest;
   const tmp = dest.replace(/\.mp4$/, ".part.mp4");
+  const W = Math.round(1080 * zoom / 2) * 2, H = Math.round(1920 * zoom / 2) * 2;
+  const vf = [
+    speed < 0.999 ? `setpts=PTS/${speed.toFixed(3)}` : null,
+    `scale=${W}:${H}:force_original_aspect_ratio=increase:flags=lanczos`,
+    `crop=1080:1920:(iw-1080)/2:(ih-1920)*0.4`,
+    "fps=30,setsar=1,eq=saturation=1.08:contrast=1.04,unsharp=5:5:0.6",
+  ].filter(Boolean).join(",");
   await run("ffmpeg", [
     "-y", "-loglevel", "error", "-ss", offset.toFixed(2), "-i", src, "-t", seconds.toFixed(2),
-    "-vf", "scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,fps=30,setsar=1,eq=saturation=1.08:contrast=1.04",
+    "-vf", vf,
     "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", tmp,
   ]);
   await rename(tmp, dest);

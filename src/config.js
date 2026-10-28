@@ -43,7 +43,11 @@ export const config = {
   voiceSpeed: Number(env("VOICE_SPEED", "1.07")), // 1 = raw TTS pace
   // AI B-roll (OpenRouter video). Empty AI_VIDEO_MODEL = stock footage only.
   aiVideoModel: env("AI_VIDEO_MODEL", "google/veo-3.1-lite"),
-  aiVideoResolution: env("AI_VIDEO_RESOLUTION", "1080p"),
+  aiVideoResolution: env("AI_VIDEO_RESOLUTION", "720p"),
+  // Hard cap on AI B-roll spend per reel (USD); beats beyond it use stock footage.
+  aiVideoBudget: Number(env("AI_VIDEO_BUDGET", "1.3")),
+  // Veo 3.1 Lite without audio: $0.03/s at 720p, $0.05/s at 1080p.
+  aiVideoPricePerSec: Number(env("AI_VIDEO_PRICE_PER_SEC", "0.03")),
   // Per-reel custom score (OpenRouter Lyria). Empty MUSIC_MODEL = built-in synth beds.
   musicModel: env("MUSIC_MODEL", "google/lyria-3-pro-preview"),
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
