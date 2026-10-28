@@ -16,18 +16,26 @@ export function beatStartIndices(beats, words) {
   for (const w of words) { wordCum.push(acc); acc += chars(w.text); }
   const totalWords = acc;
 
+  const ratio = totalWords / totalScript;
   const idx = [0];
-  let cum = 0;
   for (let i = 1; i < beats.length; i++) {
-    cum += beatChars[i - 1];
-    const target = (cum / totalScript) * totalWords;
+    // Estimate from the previous beat's real position (no drift build-up), then look for the
+    // beat's opening words nearby. Numbers ("₹6,000" vs "six thousand rupees") skew character
+    // counts, so the window is wide and two tokens must match to avoid false hits.
+    const target = wordCum[idx[i - 1]] + beatChars[i - 1] * ratio;
     let est = wordCum.findIndex((c) => c >= target - 0.5);
     if (est < 0) est = words.length - 1;
-    const first = normTok(untag(beats[i].text).split(/\s+/)[0] || "");
+    const toks = untag(beats[i].text).split(/\s+/).map(normTok).filter(Boolean);
+    const hit = (j) => {
+      if (j <= idx[i - 1] || j >= words.length) return false;
+      const w = normTok(words[j].text);
+      if (toks.length > 1 && w === toks[0] + toks[1]) return true; // "Sharma ji" heard as "Sharmaji"
+      return w === toks[0] && (toks.length < 2 || normTok(words[j + 1]?.text || "") === toks[1]);
+    };
     let best = est;
-    for (let d = 0; d <= 3 && first; d++) {
-      if (normTok(words[est + d]?.text || "") === first) { best = est + d; break; }
-      if (normTok(words[est - d]?.text || "") === first) { best = est - d; break; }
+    for (let d = 0; d <= 12 && toks.length; d++) {
+      if (hit(est + d)) { best = est + d; break; }
+      if (hit(est - d)) { best = est - d; break; }
     }
     idx.push(Math.max(idx[i - 1] + 1, Math.min(best, words.length - 1)));
   }
