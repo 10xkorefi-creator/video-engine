@@ -159,3 +159,14 @@ Use approved taglines as written; do not invent new straplines.
 | TDS | Tax you deduct from certain payments and deposit with the government |
 | Accounts payable / receivable | What you owe suppliers / what customers owe you |
 | DSO / DPO | Average days to collect from customers / to pay suppliers |
+
+## 9. VOICE OF CUSTOMER (from our own sales calls, anonymised; use as "a founder told us...", never with names)
+These are real reactions and pains. Use them as story material when they fit the topic; keep numbers exactly as written.
+- Handwritten / messy bills were the strongest reaction on demos: 6 of 19 prospects in one campaign specifically engaged with handwritten or poor-quality bill extraction. One prospect opened the call asking for software that can recover data from handwritten PDFs and photos.
+- On a bill with unreadable line items, AI Accountant inferred "paper glass", "tissue", "paper dish" from what the vendor deals in; the prospect interrupted: "How has it recognised that it's paper?"
+- Ambiguous handwriting causes real money errors: a 7 read as a 1 by the accountant ("where is my 6,000?").
+- Name mismatches: a product coded internally as one name is billed by the vendor as "200 watt floodlight", so the founder keeps inventory in a Google Sheet instead of Tally. A bank statement truncates "Path Constructions" to "PART". Reaction when AI Accountant learned the mapping: "Perfect. So it learns."
+- Founders don't trust their books: "Every day I have to audit 350 entries, and out of those 350, 35 to 40 entries are not correct." "I'm not sure if the bookkeeping is right or wrong, so I have to go through all of them myself." Duplicate bills were found only later, during an audit.
+- In small teams the founder is the checker; errors are usually found late (audit, customer reconciliation, a notice), leading to rework, penalties and interest.
+- When someone leaves, the knowledge leaves too: why this vendor is mapped to this ledger, which GST treatment a purchase gets, that a bank narration that looks like X is actually Y.
+- Spend control: "Sometimes when you give them a free hand, you are suddenly left with a payout bill which runs into lakhs."

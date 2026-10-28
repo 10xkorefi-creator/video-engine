@@ -52,22 +52,47 @@ function captionHtml(c, i) {
   return `<div class="clip cap" id="cap${i}" data-start="${f(c.start)}" data-duration="${f(c.end - c.start)}"><div class="cap-line">${words}</div></div>`;
 }
 
-function audioHtml(tl, { bed }) {
+// Transition sound per cut type: [file, volume, lead-in seconds, duration]. Kept well under the voice.
+const SFX = {
+  swish_air: [0.13, 0.12, 0.34], swish_soft: [0.14, 0.14, 0.42], swoosh_deep: [0.16, 0.2, 0.6], zip_up: [0.11, 0.16, 0.37],
+  pop: [0.15, 0.0, 0.18], shutter: [0.12, 0.0, 0.24], glitch: [0.09, 0.04, 0.29], paper: [0.15, 0.1, 0.39],
+};
+const SFX_FOR = { whip: ["swish_air", "swish_soft"], whipUp: ["zip_up", "swish_air"], punch: ["swoosh_deep", "pop"], flash: ["shutter", "glitch"] };
+
+/** Decide every cut once: visual transition + its sound. Cuts inside one spoken line are clean hard cuts. */
+function planCuts(shots) {
+  let k = 0, last = "";
+  return shots.map((s, i) => {
+    if (i === 0) return { tr: "none", sfx: null };
+    if (s.beat != null && s.beat === shots[i - 1].beat) return { tr: "cut", sfx: null };
+    const tr = TRANSITIONS[k++ % TRANSITIONS.length];
+    let opts = s.paper ? ["paper"] : s.visual?.type === "text" || s.role === "cta" ? ["pop", "glitch"] : SFX_FOR[tr] || ["swish_soft"];
+    const sfx = opts.find((o) => o !== last) || opts[0];
+    last = sfx;
+    return { tr, sfx };
+  });
+}
+
+function audioHtml(tl, { music }) {
   const a = [];
   tl.voice.forEach((v, i) =>
     a.push(`<audio id="voice${i}" src="voice.mp3" data-start="${f(v.start)}" data-media-start="${f(v.mediaStart)}" data-duration="${f(v.duration)}" data-volume="1"></audio>`));
-  a.push(`<audio id="music" src="assets/audio/${bed}.mp3" data-start="0" data-duration="${f(tl.total)}" data-volume="0.16" data-fade-in="0.4" data-fade-out="1.2"></audio>`);
-  tl.shots.forEach((s, i) => {
-    if (i === 0) return;
-    const sfx = ["whoosh", 0.32, 0.45];
-    const st = Math.max(0, s.start - (sfx[0] === "whoosh" ? 0.18 : 0.02));
-    a.push(`<audio id="sfx${i}" src="assets/audio/${sfx[0]}.mp3" data-start="${f(st)}" data-duration="${sfx[2]}" data-volume="${sfx[1]}"></audio>`);
+  // A pre-mixed, voice-ducked score (music.js) plays at full level; the built-in bed is just a quiet fallback.
+  a.push(music.mixed
+    ? `<audio id="music" src="${music.src}" data-start="0" data-duration="${f(tl.total)}" data-volume="1"></audio>`
+    : `<audio id="music" src="${music.src}" data-start="0" data-duration="${f(tl.total)}" data-volume="0.12" data-fade-in="0.4" data-fade-out="1.2"></audio>`);
+  tl.cuts.forEach((c, i) => {
+    if (!c.sfx) return;
+    const [vol, lead, dur] = SFX[c.sfx];
+    a.push(`<audio id="sfx${i}" src="assets/audio/sfx_${c.sfx}.mp3" data-start="${f(Math.max(0, tl.shots[i].start - lead))}" data-duration="${dur}" data-volume="${vol}"></audio>`);
   });
   tl.shots.forEach((s, i) => (s.paper?.cues || []).forEach((c, k) =>
     a.push(`<audio id="pen${i}_${k}" src="assets/audio/scribble.mp3" data-start="${f(c.t)}" data-duration="${f(Math.min(0.6, c.d))}" data-volume="0.09" data-fade-out="0.15"></audio>`)));
   if (tl.twistAt) {
-    a.push(`<audio id="riser" src="assets/audio/riser.mp3" data-start="${f(Math.max(0, tl.twistAt - 1.6))}" data-duration="1.6" data-volume="0.4"></audio>`);
-    a.push(`<audio id="hit" src="assets/audio/impact.mp3" data-start="${f(tl.twistAt)}" data-duration="1.0" data-volume="0.5"></audio>`);
+    // tension (heartbeat while the music drops out) -> record scratch + low hit on the twist/bridge line
+    a.push(`<audio id="heart" src="assets/audio/sfx_heartbeat.mp3" data-start="${f(Math.max(0, tl.twistAt - 1.5))}" data-duration="1.49" data-volume="0.32"></audio>`);
+    a.push(`<audio id="scratch" src="assets/audio/sfx_scratch.mp3" data-start="${f(tl.twistAt - 0.05)}" data-duration="0.55" data-volume="0.26"></audio>`);
+    a.push(`<audio id="hit" src="assets/audio/impact.mp3" data-start="${f(tl.twistAt)}" data-duration="1.0" data-volume="0.28"></audio>`);
   }
   return a.join("\n      ");
 }
@@ -79,7 +104,7 @@ function timelineJs(tl, hasHook) {
   const shots = tl.shots.map((s, i) => ({
     id: `shot${i}`, start: s.start, end: s.end, type: s.visual?.type, kind: s.asset?.kind, role: s.role, scene: s.visual?.scene, paper: !!s.paper,
     brand: !s.paper && s.visual?.type !== "footage" && !(s.visual?.type === "scene" && isProductScene(s.visual?.scene)) && s.role !== "cta",
-    tr: i === 0 ? "none" : TRANSITIONS[i % TRANSITIONS.length],
+    tr: tl.cuts[i].tr,
   }));
   const caps = tl.captions.map((c, i) => ({ id: `cap${i}`, words: c.words.map((w, j) => ({ id: `c${i}w${j}`, s: w.start, e: w.end })) }));
   return `
@@ -110,6 +135,7 @@ ${PAPER_JS}
         if (s.tr === "whip") tl.fromTo(el, { xPercent: i % 2 ? -100 : 100 }, { xPercent: 0, duration: 0.24, ease: "expo.out" }, s.start);
         else if (s.tr === "whipUp") tl.fromTo(el, { yPercent: 100 }, { yPercent: 0, duration: 0.26, ease: "expo.out" }, s.start);
         else if (s.tr === "punch") tl.fromTo(el, { scale: 1.3, opacity: 0.25 }, { scale: 1, opacity: 1, duration: 0.3, ease: "power3.out" }, s.start);
+        else if (s.tr === "cut") tl.fromTo(el, { scale: 1.05 }, { scale: 1, duration: 0.25, ease: "power2.out" }, s.start);
         else if (s.tr === "fade") tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.out" }, s.start);
         else if (s.tr === "flash") tl.fromTo("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.25, ease: "power1.out", immediateRender: false }, s.start);
         // motion on every scene
@@ -153,6 +179,9 @@ ${PAPER_JS}
       if (DATA.twistAt) {
         tl.to("#stage", { keyframes: [{ x: -14, y: 6 }, { x: 12, y: -8 }, { x: -8, y: 4 }, { x: 0, y: 0 }], duration: 0.32, ease: "none" }, DATA.twistAt);
         tl.fromTo("#flash", { opacity: 0.7 }, { opacity: 0, duration: 0.3, immediateRender: false }, DATA.twistAt);
+        // freeze-frame feel on the bridge line: drained colour + hard contrast for a beat, then snap back
+        tl.set("#stage", { filter: "grayscale(1) contrast(1.35) brightness(1.05)" }, DATA.twistAt + 0.02);
+        tl.set("#stage", { filter: "none" }, DATA.twistAt + 0.6);
       }
       window.__timelines = window.__timelines || {};
       window.__timelines["main"] = tl;`;
@@ -208,7 +237,7 @@ const CSS = `
       #flash { position: absolute; inset: 0; z-index: 700; background: #fff; opacity: 0; pointer-events: none; }`;
 
 /** Write a self-contained HyperFrames project for one reel. */
-export async function writeProject(projectDir, { timeline, title, bed, hookText = "" }) {
+export async function writeProject(projectDir, { timeline, title, bed, hookText = "", music = null }) {
   await mkdir(projectDir, { recursive: true });
   await cp(path.join(ROOT, "template", "assets"), path.join(projectDir, "assets"), { recursive: true });
   const tl = timeline;
@@ -222,6 +251,7 @@ export async function writeProject(projectDir, { timeline, title, bed, hookText 
     else if (v.type === "scene" && v.scene === "meter") s.paper = paperBlock("stat", { value: v.params?.value, label: [v.params?.label, v.params?.unit].filter(Boolean).join(" · ") }, s.start, s.end - s.start, words);
     else if (v.type === "scene" && v.scene === "paper_math") s.paper = paperBlock("math", v.params, s.start, s.end - s.start, words);
   }
+  tl.cuts = planCuts(tl.shots);
   const html = `<!doctype html>
 <html lang="en">
   <head>
@@ -234,7 +264,7 @@ export async function writeProject(projectDir, { timeline, title, bed, hookText 
   </head>
   <body>
     <div id="root" data-composition-id="main" data-start="0" data-duration="${f(tl.total)}" data-width="${W}" data-height="${H}">
-      ${audioHtml(tl, { bed })}
+      ${audioHtml(tl, { music: music || { src: `assets/audio/${bed}.mp3`, mixed: false } })}
       <div id="stage" class="clip" data-layout-allow-overlap data-start="0" data-duration="${f(tl.total)}">
         ${tl.shots.map(shotHtml).join("\n        ")}
       </div>

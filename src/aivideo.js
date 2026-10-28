@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { config } from "./config.js";
+import { config, ROOT } from "./config.js";
 import { chatJSON, generateVideo } from "./openrouter.js";
 import { judge, prepClip } from "./visuals.js";
 import { log, run } from "./util.js";
@@ -14,12 +14,16 @@ const stripTags = (s) => String(s || "").replace(/\[[^\]]*\]\s*/g, "").trim();
 
 /** One director pass: a cast bible + one cinematic prompt per footage shot, in story order. */
 async function direct(script, shots) {
+  const castFile = path.join(ROOT, "config", "cast.json");
+  const brandCast = existsSync(castFile) ? JSON.parse(await readFile(castFile, "utf8")) : {};
+  delete brandCast._note;
   const list = shots.map((s) => ({ id: s.idx, role: s.role, line: stripTags(s.beatText), part: `${s.part + 1}/${s.parts}`, seconds: +(s.end - s.start).toFixed(1), stock_hint: s.visual?.query || "" }));
   const { json, cost } = await chatJSON({
     model: config.scriptModel, temperature: 0.7, maxTokens: 6000,
     system: `You are the director of photography for a vertical (9:16) explainer reel for Indian small-business founders. The narrator's script is fixed. For each B-roll shot you write ONE prompt for a text-to-video model (Google Veo). The clip plays while the narrator says that shot's line, so it must show what the line is about, literally and instantly readable on a phone.
 
 RULES
+- BRAND CAST (recurring characters across our reels; use these EXACT looks): ${JSON.stringify(brandCast)}. If the script names one of them, use that look. If the protagonist is an unnamed founder/owner, cast Rohan; an unnamed accountant is Sharma ji; an unnamed young CA/accounts person is Priya.
 - First define a CAST: the story's protagonist (and at most one other recurring person, e.g. a supplier or accountant), each with a fixed, specific look: age, build, hair, facial hair, exact clothing and colours, setting. Copy that exact description into every prompt where the person appears, so they look the same in every shot.
 - Authentic, contemporary India: Indian people, real Indian small-business settings (wholesale market, trading office, shop counter, small factory floor, warehouse, home office), natural light, documentary realism. No Western offices, no stock-photo smiles.
 - Cinematography: vertical framing, subject large in frame, one clear action per shot, a specific camera move (slow push-in, handheld follow, gentle dolly, rack focus), shallow depth of field. Vary shot sizes across the reel (wide, medium, close-up, extreme close-up of hands/objects) so cuts feel energetic.

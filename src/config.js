@@ -44,6 +44,8 @@ export const config = {
   // AI B-roll (OpenRouter video). Empty AI_VIDEO_MODEL = stock footage only.
   aiVideoModel: env("AI_VIDEO_MODEL", "google/veo-3.1-lite"),
   aiVideoResolution: env("AI_VIDEO_RESOLUTION", "1080p"),
+  // Per-reel custom score (OpenRouter Lyria). Empty MUSIC_MODEL = built-in synth beds.
+  musicModel: env("MUSIC_MODEL", "google/lyria-3-pro-preview"),
   sttModel: env("STT_MODEL", "elevenlabs/scribe-v2"),
 
   minSeconds: Number(env("MIN_SECONDS", 40)),

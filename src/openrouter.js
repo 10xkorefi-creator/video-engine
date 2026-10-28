@@ -101,3 +101,32 @@ export async function generateVideo({ model, prompt, duration = 4, resolution = 
   }
   throw new Error(`video job timed out after ${Math.round(timeoutMs / 1000)}s`);
 }
+
+/** Music generation (Lyria via chat completions; audio output must be streamed). Returns { audio: Buffer, cost }. */
+export async function generateMusic(prompt, { model = "google/lyria-3-pro-preview" } = {}) {
+  const res = await http(`${BASE}/chat/completions`, {
+    method: "POST",
+    headers: headers({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], modalities: ["text", "audio"], audio: { format: "mp3" }, stream: true }),
+  }, 300_000);
+  let buf = "", cost = 0;
+  const chunks = [];
+  for await (const c of res.body) {
+    buf += Buffer.from(c).toString();
+    let i;
+    while ((i = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (!line.startsWith("data:") || line.endsWith("[DONE]")) continue;
+      try {
+        const j = JSON.parse(line.slice(5));
+        const a = j.choices?.[0]?.delta?.audio?.data;
+        if (a) chunks.push(Buffer.from(a, "base64"));
+        if (j.usage?.cost != null) cost = j.usage.cost;
+      } catch {}
+    }
+  }
+  const audio = Buffer.concat(chunks);
+  if (audio.length < 50_000) throw new Error(`music generation returned ${audio.length} bytes`);
+  return { audio, cost };
+}

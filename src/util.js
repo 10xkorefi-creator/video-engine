@@ -39,7 +39,7 @@ export async function http(url, opts = {}, timeoutMs = 120_000) {
   return res;
 }
 
-export function run(cmd, args, { cwd, env, quiet = true } = {}) {
+export function run(cmd, args, { cwd, env, quiet = true, stderr = false } = {}) {
   return new Promise((resolve, reject) => {
     const p = spawn(cmd, args, { cwd, env: { ...process.env, ...env } });
     let out = "";
@@ -48,7 +48,7 @@ export function run(cmd, args, { cwd, env, quiet = true } = {}) {
     p.stderr.on("data", (d) => { err += d; if (!quiet) process.stderr.write(d); });
     p.on("error", reject);
     p.on("close", (code) =>
-      code === 0 ? resolve(out) : reject(new Error(`${cmd} exited ${code}: ${(err || out).slice(-800)}`)));
+      code === 0 ? resolve(stderr ? err : out) : reject(new Error(`${cmd} exited ${code}: ${(err || out).slice(-800)}`)));
   });
 }
 

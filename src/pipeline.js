@@ -8,6 +8,7 @@ import { speak, transcribe } from "./openrouter.js";
 import { buildTimeline } from "./timing.js";
 import { resolveVisuals } from "./visuals.js";
 import { aiBroll } from "./aivideo.js";
+import { scoreReel } from "./music.js";
 import { writeProject } from "./compose.js";
 import { render, verify } from "./render.js";
 import { uploadVideo, saveJob } from "./storage.js";
@@ -166,8 +167,11 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
     const bed = angleKey === "B" ? "bed_b" : "bed_a";
     // Saved so visuals can be re-composed and re-rendered without new API calls (tools/recompose.mjs).
     const hookText = script.hook_text || "";
-    await writeFile(path.join(projectDir, "timeline.json"), JSON.stringify({ timeline, title: script.title, bed, hookText }));
-    await step("compose", () => writeProject(projectDir, { timeline, title: script.title, bed, hookText }), { retries: 0 });
+    // custom score for this reel, ducked under the voice (falls back to the built-in bed)
+    const music = await scoreReel(timeline, projectDir, { bed, voiceFile: voicePath });
+    costs.add("music", music.cost);
+    await writeFile(path.join(projectDir, "timeline.json"), JSON.stringify({ timeline, title: script.title, bed, hookText, music }));
+    await step("compose", () => writeProject(projectDir, { timeline, title: script.title, bed, hookText, music }), { retries: 0 });
 
     const mp4 = path.join(dir, `${jobId}.mp4`);
     const renderSeconds = await step("render", () => render(projectDir, mp4));

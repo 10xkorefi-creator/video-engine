@@ -61,25 +61,28 @@ STORY FIRST, RULES SECOND
 ${lang().voice}
 
 STRUCTURE (beats in this order): hook -> setup -> story -> twist -> takeaway -> cta.
-- hook: ONE beat, max 9 words, the first 3 words already intriguing, spoken in under 2.5 seconds. It must open a CURIOSITY GAP that only the rest of the reel closes. Use one of these proven patterns:
-    * a sharp question the viewer can't answer yet ("Why does the taxman care when you pay your supplier?")
-    * a counter-intuitive claim ("Paying your supplier late can raise your tax.")
-    * a specific stake ("This one date can cost you ₹4.5 lakh in tax.")
-    * a direct callout ("If you buy from small suppliers, stop scrolling.")
-  Never start with context, a greeting, "did you know", "in this video" or the topic name. Before choosing, write 3 different hooks in "hook_options" and use the strongest one (most curiosity, clearest stake) as beat 1.
+- hook: ONE beat, max 9 words, the first 3 words already intriguing, spoken in under 2.5 seconds. It must open a CURIOSITY GAP that only the rest of the reel closes. Proven patterns from our best-converting ads (pick what fits the topic):
+    * INTERACTIVE challenge (our top converter): make the viewer play along. "What was your cash flow last quarter? Answer in 5, 4, 3..." / "Read this bill in 3 seconds. Go."
+    * MINI-DRAMA cold open: drop into a tense moment mid-scene. "Rohan's boss-level question: 'Where did 6 lakh go?'" / "Sharma ji went on leave. The bills didn't."
+    * DIRECT CALLOUT to the role: "Founders, stop. Check this before you sign a cheque." / "Accountants, listen to me."
+    * COUNTER-INTUITIVE claim: "Paying your supplier late can raise your tax."
+    * SPECIFIC STAKE: "One misread 7 cost this founder ₹6,000."
+    * FLEX / CONTRARIAN: "I haven't opened my books in 3 weeks. Here's why that's fine."
+  Never start with context, a greeting, "did you know", "in this video" or the topic name. Write 3 different hooks (different patterns) in "hook_options" and use the strongest one (most curiosity, clearest stake, easiest to picture) as beat 1.
 - hook_text: a separate 3-7 word ON-SCREEN headline shown huge over the first shot. It complements (does not repeat) the spoken hook and states the stake or the question, e.g. "Late payment = more tax?" or "₹15 lakh, deduction gone". Latin script.
-- setup: the founder and situation in 1-2 beats.
-- story: 2-4 beats of what happens, with the stakes. This is where the one idea is EXPLAINED, slowly and clearly, usually on the paper canvas.
-- twist: the reveal that reframes everything.
-- takeaway: one simple, doable habit or quotable line (not tax advice beyond the blog).
+- PROMISE (beat 2, role "setup", right after the hook): one short line telling the viewer what they get if they stay, without giving it away. "By the end, you'll know the one check that stops this." / "Stay for the last part, it's the fix nobody uses."
+- setup: the situation in 1-2 beats, with our recurring characters where they fit: Rohan (the founder), Sharma ji (the veteran accountant), Priya (the young CA). Use their names; it makes the channel feel like a series.
+- story: 2-4 beats of what happens, with the stakes. This is where the one idea is EXPLAINED, slowly and clearly, usually on the paper canvas. Real customer reactions from AiA CONTEXT section 9 make great story beats ("a founder told us he audits 350 entries a day").
+- twist: the BRIDGE. One short rhetorical question or reframe that flips the problem (it is shown with a freeze-frame and a record scratch). "So my accountant has to be a handwriting expert now?" / "So you're paying tax on money you never saved?" The answer comes right after.
+- takeaway: the payoff the PROMISE pointed to: one simple, doable habit or the fix (AI Accountant when the topic is something it directly solves). Then optionally one light comic tag line (max 6 words, English, warm and human) like "Sharma ji approves." or "Chai's on Rohan." before the CTA.
 - cta: exactly one beat (text given above).
 
-PACING (Instagram Reels / YouTube Shorts retention):
+PACING (Instagram Reels / YouTube Shorts retention; our winning ad was "short and crisp, fast cuts, on-point information"):
 - 12-16 short beats, each one punchy sentence (4-14 spoken words). Something new happens on screen every 2-3 seconds.
-- No warm-up: the second beat already moves the story. Cut filler words ("basically", "so what happens is", "you see").
-- Re-hook every 10-15 seconds with an open loop ("But that's not the worst part.", "Here's where it gets expensive.", "Now watch what happens on 1 June.").
-- The payoff of the hook's question lands in the second half (the twist), not earlier, so people stay.
-- End fast: takeaway in one line, then the CTA. No recap.
+- No warm-up: hook, promise, then straight into the story. Cut filler words ("basically", "so what happens is", "you see").
+- Stack open loops: re-hook every 8-12 seconds ("But that's not the worst part.", "Here's where it gets expensive.", "Now watch what happens on 1 June."). Never resolve a loop before opening the next one.
+- Hold the payoff: the answer to the hook and the promised fix land in the last third of the reel, so people stay till the end.
+- End fast: payoff, optional tag, CTA. No recap.
 
 FACTS (strict)
 - Every real-world claim (rate, penalty, deadline, rule, statistic, real case) must come from the BLOG POST or the RESEARCH NOTES. Never invent real cases, company names, statistics or rules. Prefer research notes when newer.
