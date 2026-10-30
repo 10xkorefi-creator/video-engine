@@ -42,7 +42,9 @@ export const config = {
   // English reels use their own voice; empty falls back to TTS_MODEL / TTS_VOICE.
   ttsModelEn: env("TTS_MODEL_EN", ""),
   ttsVoiceEn: env("TTS_VOICE_EN", "RpiHVNPKGBg7UmgmrKrN"), // Aashish (Indian English)
-  voiceSpeed: Number(env("VOICE_SPEED", "1.07")), // 1 = raw TTS pace
+  voiceSpeed: Number(env("VOICE_SPEED", "1.03")),
+  // ElevenLabs v3 stability: 0 = Creative (most expressive), 0.5 = Natural, 1 = Robust.
+  ttsStability: Number(env("TTS_STABILITY", "0")), // 1 = raw TTS pace
   // AI B-roll (OpenRouter video). Empty AI_VIDEO_MODEL = stock footage only.
   aiVideoModel: env("AI_VIDEO_MODEL", "google/veo-3.1-lite"),
   aiVideoResolution: env("AI_VIDEO_RESOLUTION", "720p"),

@@ -9,10 +9,11 @@ import { generateMusic, transcribe } from "./openrouter.js";
 import { log, run } from "./util.js";
 
 const STYLES = [
-  "punchy lo-fi hip-hop: crisp swung hi-hats, tight kick, warm Rhodes chords, subtle tabla fills",
-  "modern Indian trap: deep 808 bass, snappy claps, rolling hi-hats, a short sitar-like pluck motif",
+  "punchy lo-fi hip-hop: crisp swung hi-hats, tight kick, warm Rhodes chords",
+  "modern minimal trap: deep 808 bass, snappy claps, rolling hi-hats, sparse bell plucks",
   "upbeat funky groove: tight live drums, slap bass, bright muted guitar stabs, playful",
-  "driving cinematic electronic pulse: ticking hi-hats, big synth bass, short risers, confident",
+  "driving tech-house pulse: four-on-the-floor kick, ticking hats, rubbery bass, short risers",
+  "cinematic electronic tension: pulsing synth bass, ticking percussion, airy pads, confident",
 ];
 
 function prompt(tl, seed) {
@@ -20,11 +21,11 @@ function prompt(tl, seed) {
   const total = Math.ceil(tl.total + 2);
   const twist = tl.twistAt ? tl.twistAt.toFixed(1) : null;
   return [
-    `Instrumental background score for a fast-paced Instagram/YouTube Shorts explainer about money and business for Indian founders. Style: ${style}. Around 105 BPM.`,
+    `Instrumental background score for a fast-paced Instagram/YouTube Shorts explainer about money and business. Style: ${style}. Around 105 BPM.`,
     "Starts IMMEDIATELY with the full beat on the very first second (no fade-in, no slow intro) to hook the viewer.",
     twist ? `Energy builds steadily; at about ${(tl.twistAt - 1.5).toFixed(1)} seconds strip down to a tense, minimal groove, then at ${twist} seconds drop back in harder with extra drums and bass and keep that higher energy to the end.` : "Energy builds steadily throughout with small fills every 8 bars.",
     `Total length about ${total} seconds, ending on a clean final hit.`,
-    "Strictly instrumental: no vocals, no singing, no choir, no spoken words. Mix with space for a voice-over: no busy lead melody in the mid-range.",
+    "Strictly instrumental: no vocals, no singing, no choir, no spoken words. It sits UNDER a voice-over: rhythm and bass drive the pace; no lead melody, no busy mid-range, no prominent instrument solos.",
   ].join(" ");
 }
 
@@ -73,8 +74,8 @@ export async function mixTrack(file, tl, voiceFile, out) {
       ...segs, vmix,
       `[vb]asplit=2[sc][vout]`,
       // level the score well below the voice, then duck it further whenever someone speaks
-      `[0:a]atrim=${start}:${(start + tl.total).toFixed(2)},asetpts=PTS-STARTPTS,loudnorm=I=-21:TP=-2:LRA=9${drop}[m]`,
-      `[m][sc]sidechaincompress=threshold=0.05:ratio=3.5:attack=20:release=300:makeup=1[duck]`,
+      `[0:a]atrim=${start}:${(start + tl.total).toFixed(2)},asetpts=PTS-STARTPTS,loudnorm=I=-23:TP=-3:LRA=7${drop}[m]`,
+      `[m][sc]sidechaincompress=threshold=0.02:ratio=6:attack=15:release=350:makeup=1[duck]`,
       `[duck]afade=t=out:st=${Math.max(0, tl.total - 1.3).toFixed(2)}:d=1.3,volume=1.0[out]`,
       `[vout]anullsink`,
     ].join(";");

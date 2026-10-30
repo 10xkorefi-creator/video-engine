@@ -53,11 +53,13 @@ async function generationCost(id) {
 }
 
 /** Text to speech -> mp3 buffer + cost. */
-export async function speak(text, { model = config.ttsModel, voice = config.ttsVoice } = {}) {
+export async function speak(text, { model = config.ttsModel, voice = config.ttsVoice, stability } = {}) {
+  // ElevenLabs v3 voice settings pass through OpenRouter's provider options.
+  const provider = stability != null && /eleven-v3/.test(model) ? { options: { elevenlabs: { voice_settings: { stability } } } } : undefined;
   const res = await http(`${BASE}/audio/speech`, {
     method: "POST",
     headers: headers({ "Content-Type": "application/json" }),
-    body: JSON.stringify({ model, input: text, voice, response_format: "mp3" }),
+    body: JSON.stringify({ model, input: text, voice, response_format: "mp3", provider }),
   }, 180_000);
   const buf = Buffer.from(await res.arrayBuffer());
   if (buf.length < 5000) throw new Error(`TTS returned only ${buf.length} bytes`);

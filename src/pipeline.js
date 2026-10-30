@@ -51,6 +51,17 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
 }
 
 /** A topic from the topic bank becomes the "blog" (direction): its related blog if any, else a research brief. */
+/** Share of the script's words that the voice actually said (catches ad-libbed or skipped lines). */
+function fidelity(script, heard) {
+  const toks = (t) => String(t).toLowerCase().replace(/[^a-z\u0900-\u097f\s]/g, " ").split(/\s+/).filter((w) => w.length > 2);
+  const bag = new Map();
+  for (const w of toks(heard)) bag.set(w, (bag.get(w) || 0) + 1);
+  const want = toks(script);
+  let hit = 0;
+  for (const w of want) if (bag.get(w) > 0) { hit++; bag.set(w, bag.get(w) - 1); }
+  return want.length ? hit / want.length : 1;
+}
+
 export async function sourceFor(topic, blogUrl, blogRow) {
   if (blogRow) return blogFromRow(blogRow);
   if (!topic) return fetchBlog(blogUrl);
@@ -112,9 +123,23 @@ export async function makeReel({ blogUrl, blogRow, topic, angle = "A", upload = 
       const en = lang === "english";
       const ttsModel = (en && config.ttsModelEn) || config.ttsModel;
       const ttsVoice = voice || (en && config.ttsVoiceEn) || config.ttsVoice;
-      const { audio, cost } = await step("tts", () => speak(text, { model: ttsModel, voice: ttsVoice }));
+      let stability = config.ttsStability;
+      let { audio, cost } = await step("tts", () => speak(text, { model: ttsModel, voice: ttsVoice, stability }));
       costs.add("tts", cost);
       await writeFile(voicePath, audio);
+      // Creative mode is the most expressive but can ad-lib: if the read drifts from the script, redo it in Natural.
+      if (stability < 0.5) {
+        const heard = await transcribe(voicePath);
+        costs.add("stt", heard.cost);
+        const fid = fidelity(scriptPlain(script), heard.text);
+        if (fid < 0.85) {
+          log(`  voice drifted from the script (${Math.round(fid * 100)}% match): re-reading in Natural mode`);
+          stability = 0.5;
+          ({ audio, cost } = await step("tts", () => speak(text, { model: ttsModel, voice: ttsVoice, stability })));
+          costs.add("tts", cost);
+          await writeFile(voicePath, audio);
+        }
+      }
       // A touch faster than the raw read keeps Reels/Shorts pacing tight without sounding rushed.
       if (config.voiceSpeed !== 1) {
         const fast = path.join(projectDir, "voice_tempo.mp3");
@@ -141,7 +166,7 @@ export async function makeReel({ blogUrl, blogRow, topic, angle = "A", upload = 
       const targetSec = total > maxS ? maxS - 6 : (config.minSeconds + config.maxSeconds) / 2;
       const targetWords = Math.round(words * (targetSec - LEAD - TAIL - PAUSE) / audioDur);
       ({ script } = await step("script", () => scriptWithChecks(blog, angle, costs, { targetWords, research, previous: script,
-        feedback: `The voice-over came out at ${total.toFixed(0)} seconds; it must be ${config.minSeconds}-${maxS} seconds. ${total > maxS ? "Shorten" : "Lengthen"} the script to about ${targetWords} spoken words by ${total > maxS ? "cutting or merging the least important beats" : "adding one story beat"}; keep the hook, twist, takeaway and CTA.` }), { retries: 0 }));
+        feedback: `The voice-over came out at ${total.toFixed(0)} seconds; it must be ${config.minSeconds}-${maxS} seconds. ${total > maxS ? "Shorten" : "Lengthen"} the script to about ${targetWords} spoken words by ${total > maxS ? "cutting or merging the least important beats" : "adding one story beat"}; keep the hook, bridge, payoff and both CTA beats (THE TEMPLATE).` }), { retries: 0 }));
     }
 
     const stt = await step("timing", () => transcribe(voicePath));

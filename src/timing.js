@@ -49,7 +49,8 @@ export function beatStartIndices(beats, words) {
 export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead = 0.1, tail = 0.9 }) {
   const beats = script.beats;
   const starts = beatStartIndices(beats, words);
-  const twistBeat = beats.findIndex((b) => b.role === "twist");
+  // The bridge (old scripts: the twist) gets the dramatic pause, freeze-frame and record scratch.
+  const twistBeat = beats.findIndex((b) => b.role === "bridge" || b.role === "twist");
   const splitWord = twistBeat > 0 ? starts[twistBeat] : -1;
   const splitAt = splitWord > 0 ? (words[splitWord - 1].end + words[splitWord].start) / 2 : null;
   const shift = (t) => lead + t + (splitAt != null && t >= splitAt ? pause : 0);
@@ -58,8 +59,11 @@ export function buildTimeline(script, words, { audioDuration, pause = 0.35, lead
   const total = shift(audioDuration) + tail;
 
   // Beat windows: each beat owns the screen from its first word until the next beat starts.
+  // Only the last cta beat is the end card; an earlier one (the callback punchline) plays like a body beat.
+  const lastCta = beats.map((b) => b.role).lastIndexOf("cta");
   const beatWin = beats.map((b, i) => ({
     ...b,
+    role: b.role === "cta" && i !== lastCta ? "tag" : b.role,
     start: i === 0 ? 0 : W[starts[i]].start - 0.08,
     end: i + 1 < beats.length ? W[starts[i + 1]].start - 0.08 : total,
   }));
