@@ -42,3 +42,18 @@ export async function usedSources() {
   const rows = await (await http(url, { headers: headers() }, 30_000)).json();
   return new Set(rows.map((r) => r.blog_url));
 }
+
+/** (blog_url, angle) of every reel already made or in progress (failed ones get retried). */
+export async function usedJobs() {
+  const url = `${config.supabaseUrl}/rest/v1/${config.supabaseTable}?select=blog_url,angle&status=neq.failed&limit=10000`;
+  return (await http(url, { headers: headers() }, 30_000)).json();
+}
+
+/** Rows of the top_blogs table (our best-performing blog posts, with full body). */
+export async function topBlogs({ id } = {}) {
+  const cols = "id,slug,url,title,description,keywords,body,clicks,impressions,ctr,avg_position,blog_category";
+  const url = `${config.supabaseUrl}/rest/v1/${config.topBlogsTable}?select=${cols}${id != null ? `&id=eq.${encodeURIComponent(id)}` : ""}&limit=1000`;
+  const rows = await (await http(url, { headers: headers() }, 30_000)).json();
+  if (!Array.isArray(rows)) throw new Error(`top_blogs read failed: ${JSON.stringify(rows).slice(0, 200)}`);
+  return rows;
+}

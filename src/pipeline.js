@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.js";
-import { fetchBlog } from "./blog.js";
+import { blogFromRow, fetchBlog } from "./blog.js";
 import { research as doResearch, sourcesText } from "./research.js";
 import { PRODUCT, stripTags, setLanguage, writeScript, factCheck, plainCheck, unsupportedNumbers, validateShape, scriptText, scriptPlain, romanize } from "./script.js";
 import { speak, transcribe } from "./openrouter.js";
@@ -51,7 +51,8 @@ export async function scriptWithChecks(blog, angle, costs, opts = {}) {
 }
 
 /** A topic from the topic bank becomes the "blog" (direction): its related blog if any, else a research brief. */
-export async function sourceFor(topic, blogUrl) {
+export async function sourceFor(topic, blogUrl, blogRow) {
+  if (blogRow) return blogFromRow(blogRow);
   if (!topic) return fetchBlog(blogUrl);
   const brief = [
     `TOPIC: ${topic.title}`, `PROBLEM: ${topic.problem || ""}`, `WHY IT MATTERS: ${topic.why_it_matters || ""}`,
@@ -66,10 +67,11 @@ export async function sourceFor(topic, blogUrl) {
   return { url: topic.related_blog || "https://www.aiaccountant.com", title: topic.title, aiaFit: topic.aia_fit, text: brief };
 }
 
-export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voice, outDir, language }) {
+export async function makeReel({ blogUrl, blogRow, topic, angle = "A", upload = true, voice, outDir, language }) {
   const t0 = Date.now();
   const lang = setLanguage(language);
-  if (topic) blogUrl = `topic:${topic.id}`;
+  if (blogRow) blogUrl = blogRow.url;
+  else if (topic) blogUrl = `topic:${topic.id}`;
   const costs = new Costs();
   const angleKey = /^[ABCD]$/i.test(angle) ? angle.toUpperCase() : `custom-${slugify(angle).slice(0, 24)}`;
   const date = new Date().toISOString().slice(0, 10);
@@ -77,11 +79,11 @@ export async function makeReel({ blogUrl, topic, angle = "A", upload = true, voi
   const dir = outDir || path.join(config.workDir, jobId);
   const projectDir = path.join(dir, "project");
   await mkdir(projectDir, { recursive: true });
-  const base = { blog_url: blogUrl, angle: angleKey, language: lang, topic: topic?.title || null };
+  const base = { blog_url: blogUrl, angle: angleKey, language: lang, topic: topic?.title || blogRow?.title || null };
   if (upload) await saveJob({ ...base, status: "rendering", failed_step: null, error: null });
 
   try {
-    const blog = await step("fetch_blog", () => sourceFor(topic, blogUrl));
+    const blog = await step("fetch_blog", () => sourceFor(topic, blogUrl, blogRow));
 
     // Research is best-effort: if web search fails we still write from the blog alone.
     let research = { keyword: blog.title, notes: [], conflicts: [] };

@@ -182,7 +182,12 @@ SEARCH KEYWORD: ${research?.keyword || blog.title}
 RESEARCH NOTES (verified, newer than the blog; you may use these facts):
 ${notes.length ? notes.map((n) => `- ${n.fact}`).join("\n") : "- (none)"}
 ${targetWords ? `TARGET LENGTH: about ${targetWords} spoken words total.\n` : ""}${feedback ? (previous ? `YOUR PREVIOUS DRAFT (below) WAS REJECTED. Make the SMALLEST possible edit: rewrite or remove only the flagged lines and keep the rest of the story (if the problem is length, cut or merge beats until it fits; that is the only case where you may change other beats). Never replace a flagged claim with a new unsupported claim.\nProblems:\n${feedback}\nPREVIOUS DRAFT JSON:\n${JSON.stringify(previous)}\n` : `YOUR PREVIOUS DRAFT WAS REJECTED. Fix these problems:\n${feedback}\n`) : ""}
-BLOG_URL: ${blog.url}
+${blog.fromTopBlogs ? `HOW TO USE THIS BLOG: it is one of our best-performing posts (people search for it a lot), so the subject is proven demand. Use it as INSPIRATION, not a script:
+1. Read the title, description, search keywords and body, and ask: why does a founder search for this, and what goes wrong for them if they don't know it?
+2. Pick 1-3 bits (a surprising fact, a common mistake, a shortcut, a stake) that make the best story. Ignore the rest, however useful.
+3. Build an original story around those bits with our characters. Reference posts (lists, how-tos, tools, due dates) are about a moment of need: dramatise that moment, then give the one trick or answer that saves the day.
+4. Never walk through the blog's steps or list in order, never mention "this blog" or "our article" (the link is in the first comment).
+` : ""}BLOG_URL: ${blog.url}
 BLOG TITLE: ${blog.title}
 BLOG POST:
 """

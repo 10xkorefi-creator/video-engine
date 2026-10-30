@@ -119,12 +119,15 @@ const BAD_TAGS = /\b(cartoon|doodle|animation|animated|illustration|drawing|sket
  * Vision check: show the candidates' thumbnails next to the spoken line and score each 0-10.
  * Returns { scores, better } where better is a fresh 2-3 word search if nothing fits.
  */
+const PEOPLE = /\b(man|woman|men|women|person|people|owner|founder|businessman|businesswoman|entrepreneur|accountant|worker|team|customer|shopkeeper|employee|boss|manager|girl|boy|family|face)\b/i;
+
 export async function judge(line, query, cands) {
   const { json, cost } = await chatJSON({
     model: config.checkModel, temperature: 0, maxTokens: 1500,
     system: `You pick B-roll for a vertical explainer reel for Indian small-business founders. You get the line the narrator says while the clip plays, and numbered thumbnails.
 Score each image 0-10 for how clearly it shows what the line is about, literally, so a viewer immediately connects picture and words. 8-10: shows the exact subject (e.g. an invoice for "invoice", a worried owner for "worried", a shop for "shopkeeper"). 5-7: same setting and mood. 0-4: unrelated object or scene, cartoon/drawing/animation, abstract, mostly text, a watermark, or a mismatched culture or setting.
-Return ONLY JSON: {"scores":[one integer per image, in order],"better":"if every score is below 6, a 2-3 word ENGLISH stock-video search that would find a fitting real-world clip, else empty"}`,
+PEOPLE: the audience and our characters are Indian. If a person's face is clearly visible and they do not look South Asian, score at most 3, however well it matches. Hands, objects, screens and places without visible faces are fine.
+Return ONLY JSON: {"scores":[one integer per image, in order],"better":"if every score is below 6, a 2-3 word ENGLISH stock-video search that would find a fitting real-world clip (start with 'indian' when it shows people), else empty"}`,
     user: `Narrator line: "${line}"\nSearch used: "${query}"\nImages 1-${cands.length} follow.`,
     images: cands.map((c) => c.thumb),
   });
@@ -170,6 +173,8 @@ export async function resolveVisuals(shots, projectDir, { seed = Date.now() % 99
     const line = String(shot.beatText || "").replace(/\[[^\]]*\]\s*/g, "");
     const need = shot.end - shot.start + 0.6;
     let query = shot.visual.query || "business office";
+    // People shots: ask the libraries for Indian people first (the judge rejects other faces anyway).
+    if (PEOPLE.test(query) && !/\b(indian|india|desi)\b/i.test(query)) query = `indian ${query}`;
     let pick = null;
 
     for (let round = 0; round < 2 && !pick; round++) {

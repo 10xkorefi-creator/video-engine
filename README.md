@@ -2,7 +2,12 @@
 
 Turns an AI Accountant blog post into a 40–60 s faceless, voice-led vertical explainer (1080×1920 MP4) for YouTube Shorts, Instagram Reels and LinkedIn.
 The blog sets the **topic direction**. The engine researches it on the web and writes an **original Hinglish story** around the most gripping fact.
-n8n triggers it daily, makes 2 reels (angles A and B), and sends both to MS Teams for approval.
+n8n triggers it Mon–Fri, makes 1 English reel, and sends it to MS Teams.
+
+**Where reels come from:** the Supabase table `top_blogs` (our best-performing posts: title, description, keywords, HTML body, GSC clicks and impressions).
+`GET /plan` ranks those blogs by clicks and impressions and picks the best one that has no reel in `reel_jobs` yet. Once every blog has a reel,
+the best blogs get another one from a new angle (A, then D, B, C). The script uses the blog as inspiration, not as a summary.
+`GET /plan?source=topics` still serves the older topic bank (`config/topics.json`).
 
 ```
 blog URL ─► fetch ─► web research (sourced facts + blog-conflict flags) ─► script (Sonnet, Hinglish, hook ≤2 s)
@@ -16,8 +21,10 @@ blog URL ─► fetch ─► web research (sourced facts + blog-conflict flags) 
 `POST /reels` (header `Authorization: Bearer $SERVICE_TOKEN`)
 
 ```json
-{ "blog_url": "https://www.aiaccountant.com/blog/tds-filing-due-date", "angle": "A" }
+{ "blog_id": 3, "angle": "A", "language": "english" }
 ```
+
+`blog_id` is a `top_blogs` id (what `/plan` returns). `blog_url` (any blog page) or `topic_id` (topic bank) also work.
 
 `angle` is `A` (costly mistake), `B` (contrarian take) or any free-text angle. The call is synchronous and takes about 4–6 minutes. Renders run one at a time and are queued.
 
@@ -42,6 +49,8 @@ Each step is retried once inside the service, and n8n retries the whole call onc
 ```bash
 npm ci
 cp .env.example .env    # fill in keys
+node src/cli.js --next --no-upload            # the blog the daily plan would pick
+node src/cli.js --blog-id 3 --angle D --no-upload
 node src/cli.js --blog https://www.aiaccountant.com/blog/gst-on-freight-charges --angle B
 node src/cli.js --blog <url> --angle "why founders overpay GST on transport" --no-upload
 ```

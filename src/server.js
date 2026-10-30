@@ -2,7 +2,8 @@ import http from "node:http";
 import { config } from "./config.js";
 import { makeReel } from "./pipeline.js";
 import { loadTopics, nextTopics } from "./topics.js";
-import { usedSources } from "./storage.js";
+import { topBlogs, usedSources } from "./storage.js";
+import { nextBlogJobs } from "./blogplan.js";
 import { log } from "./util.js";
 
 // One render at a time: renders saturate the CPU, so concurrent requests queue.
@@ -26,11 +27,15 @@ const server = http.createServer(async (req, res) => {
 
     const authed = !config.serviceToken || req.headers.authorization === `Bearer ${config.serviceToken}`;
 
-    // Today's plan: N unused topics from the bank, each with a language and an angle.
+    // Today's plan: the best-performing top blogs without a reel yet (source=topics: the old topic bank).
     if (req.method === "GET" && req.url.startsWith("/plan")) {
       if (!authed) return send(res, 401, { ok: false, error: "unauthorized" });
       const q = new URL(req.url, "http://x").searchParams;
-      const languages = (q.get("languages") || "english,english,english").split(",");
+      const languages = (q.get("languages") || "english").split(",");
+      if (q.get("source") !== "topics") {
+        const { jobs, blogs } = await nextBlogJobs(languages.length);
+        return send(res, 200, { ok: true, source: "top_blogs", blogs, jobs: jobs.map((j, i) => ({ ...j, language: languages[i].trim() })) });
+      }
       const used = await usedSources();
       const usedIds = new Set([...used].filter((u) => u.startsWith("topic:")).map((u) => u.slice(6)));
       const picks = nextTopics(usedIds, languages.length);
@@ -48,13 +53,15 @@ const server = http.createServer(async (req, res) => {
       for await (const chunk of req) raw += chunk;
       let body;
       try { body = JSON.parse(raw || "{}"); } catch { return send(res, 400, { ok: false, error: "invalid JSON" }); }
-      const topic = body.topic_id ? loadTopics().topics.find((t) => t.id === body.topic_id) : null;
-      if (body.topic_id && !topic) return send(res, 400, { ok: false, error: `unknown topic_id ${body.topic_id}` });
-      if (!topic && !/^https?:\/\//.test(body.blog_url || "")) return send(res, 400, { ok: false, error: "topic_id or blog_url required" });
+      const blogRow = body.blog_id != null ? (await topBlogs({ id: body.blog_id }))[0] : null;
+      if (body.blog_id != null && !blogRow) return send(res, 400, { ok: false, error: `unknown blog_id ${body.blog_id}` });
+      const topic = !blogRow && body.topic_id ? loadTopics().topics.find((t) => t.id === body.topic_id) : null;
+      if (!blogRow && body.topic_id && !topic) return send(res, 400, { ok: false, error: `unknown topic_id ${body.topic_id}` });
+      if (!blogRow && !topic && !/^https?:\/\//.test(body.blog_url || "")) return send(res, 400, { ok: false, error: "blog_id, topic_id or blog_url required" });
 
-      log(`request: ${topic ? "topic " + topic.id : body.blog_url} angle=${body.angle || "A"} lang=${body.language || "default"} (queue ${queued})`);
+      log(`request: ${blogRow ? "blog " + blogRow.slug : topic ? "topic " + topic.id : body.blog_url} angle=${body.angle || "A"} lang=${body.language || "default"} (queue ${queued})`);
       const result = await enqueue(() =>
-        makeReel({ blogUrl: body.blog_url, topic, angle: body.angle || "A", voice: body.voice, language: body.language, upload: body.upload !== false }));
+        makeReel({ blogUrl: body.blog_url, blogRow, topic, angle: body.angle || "A", voice: body.voice, language: body.language, upload: body.upload !== false }));
       return send(res, result.ok ? 200 : 500, result);
     }
     send(res, 404, { ok: false, error: "not found" });

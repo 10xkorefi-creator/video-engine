@@ -29,6 +29,8 @@ export const config = {
   supabaseKey: env("SUPABASE_SERVICE_KEY", ""),
   supabaseBucket: env("SUPABASE_BUCKET", "reels"),
   supabaseTable: env("SUPABASE_TABLE", "reel_jobs"),
+  // Reels are made from our best-performing blogs (title, description, keywords, body, GSC stats).
+  topBlogsTable: env("TOP_BLOGS_TABLE", "top_blogs"),
 
   scriptModel: env("SCRIPT_MODEL", "anthropic/claude-sonnet-5.5"),
   checkModel: env("CHECK_MODEL", "anthropic/claude-haiku-5.5"),
