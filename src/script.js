@@ -127,7 +127,7 @@ Return ONLY JSON:
  "hook_text":"3-7 word on-screen headline for the first shot",
  "title":"YouTube Shorts title, max 60 chars, relatable and curiosity-driven, MUST contain the SEARCH KEYWORD (or a close variant), no clickbait lies",
  "beats":[{"role":"hook|bridge|body|cta","kind":"fact|example","text":"spoken words","visual":{...},"keywords":["..."]}],
- "caption":"Post caption, max 3 short lines (under 300 characters). Line 1 is a scroll-stopping hook for readers (max 12 words: a surprising stake, a sharp question or a bold claim the reel backs up; not a copy of the spoken hook, no 'Did you know', no emoji spam). Line 2 is the one-line payoff or takeaway. Optional line 3: a short nudge to read the link in the first comment. NO URLs or links in the caption (the link goes in the first comment)",
+ "caption":"Post caption, exactly 3 short lines (under 260 characters), written like a scroll-stopping post, not a summary. Line 1 = THE HOOK: a punchy, specific, slightly provocative line in the same spirit as the reel's hook but NOT a copy of it: a tense moment ('Your CA might be pasting your balance sheet into a chatbot right now.'), a sharp question ('Would your accountant spot a 7 that looks like a 1?'), or a staccato stake ('Free tool. Your margins. Someone else's server.'). Max 12 words, at most 1 emoji. Line 2 = the twist or payoff in one line that makes them want the details (a surprising fact from the reel, not a lecture). Line 3 = a curiosity nudge to the first comment that names what they get ('The one rule ICAI wants you to follow is in the first comment.'). BANNED: generic lines ('can cost you more than you think', 'did you know', 'in today's world', 'game changer', 'read the full breakdown'), hashtags inside the caption, URLs or links (the link goes in the first comment)",
  "hashtags":["#GST","..."] (6-10, mix broad and niche, Indian business context)}`;
 
 const norm = (s) => s.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ");
@@ -199,6 +199,8 @@ export function validateShape(s) {
   if (worked && !beats.some((b) => b.visual?.scene === "paper_math")) errs.push(`Show the worked example on paper: give the beat "${stripTags(worked.text).slice(0, 80)}" a paper_math scene with its figures as rows and the outcome as the result.`);
   if (String(s.caption || "").length > 320) errs.push("caption too long: max 3 short lines, under 300 characters, starting with a hook line");
   if (/https?:\/\/|www\.|\.com\b/i.test(s.caption || "")) errs.push("caption must not contain any link or URL (the link goes in the first comment)");
+  const flat = String(s.caption || "").match(/more than you think|did you know|in today'?s|game[- ]changer|read the full breakdown|full breakdown via/i);
+  if (flat) errs.push(`caption is generic ("${flat[0]}"): line 1 must be a specific, scroll-stopping hook and line 3 a curiosity nudge that names what's in the first comment`);
   const onScreen = [s.title, s.caption, s.hook_text, ...beats.flatMap((b) => [b.visual?.value, b.visual?.label])].join(" ");
   if (currentLanguage === "english" && beats.some((b) => /[ऀ-ॿ]/.test(b.text))) errs.push("This is an ENGLISH reel: rewrite every beat in English only, no Hindi or Devanagari.");
   if (/[ऀ-ॿ]/.test(onScreen)) errs.push("on-screen text, title and caption must use Latin script only");
